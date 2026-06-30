@@ -29,6 +29,7 @@ button{font-family:inherit}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .home-cont{display:block;background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden}
 .home-vid{position:relative;height:170px}
+.home-user{position:relative;flex-shrink:0}
 .pf-player{display:grid;grid-template-columns:1fr;gap:0}
 .pf-aside{margin-top:34px;border-top:1px solid var(--line);background:var(--panel);margin-left:-22px;margin-right:-22px;padding:20px 16px}
 .g-dash{display:grid;grid-template-columns:1fr;gap:16px}
@@ -47,6 +48,7 @@ button{font-family:inherit}
   .scr{max-width:1180px;margin:0 auto;padding:46px 40px 90px}
   .scr.narrow{max-width:1000px}
   .g1,.g2{grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+  .home-user{display:none}
   .home-cont{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
   .home-vid{height:auto;min-height:300px}
   .pf-player{grid-template-columns:minmax(0,1fr) 340px;gap:34px;align-items:start}
@@ -185,6 +187,7 @@ var BOTTOM=[
 /* ============ STATE ============ */
 var state={
   screen:'welcome',
+  menu:false,
   activeLessonId:'intro-3',
   completed:{'intro-1':true,'intro-2':true},
   openSection:'intro',
@@ -208,7 +211,10 @@ function activeSection(){return SECTIONS.find(function(s){return s.lessons.some(
 
 /* ============ ACTIONS (global) ============ */
 var app={
-  go:function(s){state.screen=s;render();document.getElementById('screen').scrollTop=0;},
+  go:function(s){state.menu=false;state.screen=s;render();document.getElementById('screen').scrollTop=0;},
+  login:function(){state.menu=false;state.screen='home';render();document.getElementById('screen').scrollTop=0;},
+  logout:function(){state.menu=false;state.screen='login';render();document.getElementById('screen').scrollTop=0;},
+  toggleMenu:function(){state.menu=!state.menu;render();},
   openLesson:function(id){state.activeLessonId=id;state.screen='player';state.playerTab='guion';render();document.getElementById('screen').scrollTop=0;},
   toggleSection:function(id){state.openSection=state.openSection===id?null:id;render();},
   toggleComplete:function(){var id=state.activeLessonId;if(state.completed[id])delete state.completed[id];else state.completed[id]=true;render();},
@@ -236,18 +242,32 @@ function viewWelcome(){
   +'<h1 style="margin:0;font:800 32px/1.08 \'Plus Jakarta Sans\';letter-spacing:-.02em;max-width:300px">Aprende a sentir tu instrumento</h1>'
   +'<p style="margin:14px 0 0;font:400 15.5px/1.55 \'Hanken Grotesk\';color:var(--mut);max-width:280px">Técnica vocal sensorial. Primero sentir, después soltar. La resonancia aparece sola.</p></div>'
   +'<div style="width:100%;display:flex;flex-direction:column;gap:11px">'
-  +'<button onclick="app.go(\'home\')" style="width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;cursor:pointer;padding:16px;border-radius:14px;font:700 15.5px \'Plus Jakarta Sans\';box-shadow:0 14px 36px -12px rgba(240,80,46,.55)">Comenzar</button>'
-  +'<button onclick="app.go(\'home\')" style="width:100%;background:rgba(0,0,0,.04);color:var(--txt);border:1px solid var(--line2);cursor:pointer;padding:15px;border-radius:14px;font:600 15px \'Hanken Grotesk\'">Ya tengo cuenta</button>'
+  +'<button onclick="app.go(\'login\')" style="width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;cursor:pointer;padding:16px;border-radius:14px;font:700 15.5px \'Plus Jakarta Sans\';box-shadow:0 14px 36px -12px rgba(240,80,46,.55)">Comenzar</button>'
+  +'<button onclick="app.go(\'login\')" style="width:100%;background:rgba(0,0,0,.04);color:var(--txt);border:1px solid var(--line2);cursor:pointer;padding:15px;border-radius:14px;font:600 15px \'Hanken Grotesk\'">Ya tengo cuenta</button>'
   +'<div style="display:flex;gap:6px;justify-content:center;margin-top:12px"><span style="width:22px;height:5px;border-radius:5px;background:var(--accent)"></span><span style="width:5px;height:5px;border-radius:5px;background:rgba(0,0,0,.14)"></span><span style="width:5px;height:5px;border-radius:5px;background:rgba(0,0,0,.14)"></span></div></div></div>';
 }
 
+function viewLogin(){
+  return '<div class="scn" style="min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:44px 26px;background:radial-gradient(125% 80% at 50% 0%, #FFFFFF, #F4EFE7 70%)">'
+  +'<div style="width:100%;max-width:360px">'
+  +'<div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:30px">'+LOGO+'<span style="line-height:1;text-align:left"><span style="display:block;font:700 13px/1 \'Plus Jakarta Sans\';letter-spacing:.16em">RESONANCE</span><span style="display:block;font:500 9px/1.4 \'JetBrains Mono\';letter-spacing:.34em;color:var(--accent)">M E T H O D</span></span></div>'
+  +'<h1 style="margin:0 0 8px;font:800 27px/1.1 \'Plus Jakarta Sans\';letter-spacing:-.01em">Bienvenida de nuevo</h1>'
+  +'<p style="margin:0 0 28px;font:400 15px/1.5 \'Hanken Grotesk\';color:var(--mut)">Entra para continuar tu práctica.</p>'
+  +'<div style="text-align:left;display:flex;flex-direction:column;gap:14px">'
+  +'<div><label style="display:block;font:600 12.5px \'Hanken Grotesk\';color:var(--mut);margin:0 0 7px">Email</label><input type="email" value="valentina@email.com" style="width:100%;background:#fff;border:1px solid var(--line2);border-radius:11px;padding:13px 15px;font:400 15px \'Hanken Grotesk\';color:var(--txt);outline:none"></div>'
+  +'<div><label style="display:block;font:600 12.5px \'Hanken Grotesk\';color:var(--mut);margin:0 0 7px">Contraseña</label><input type="password" value="resonance" style="width:100%;background:#fff;border:1px solid var(--line2);border-radius:11px;padding:13px 15px;font:400 15px \'Hanken Grotesk\';color:var(--txt);outline:none"></div>'
+  +'</div>'
+  +'<button onclick="app.login()" style="width:100%;margin-top:20px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;cursor:pointer;padding:16px;border-radius:14px;font:700 15.5px \'Plus Jakarta Sans\';box-shadow:0 14px 36px -12px rgba(240,80,46,.55)">Entrar a la plataforma</button>'
+  +'<div style="margin-top:16px;font:500 13px \'Hanken Grotesk\';color:var(--mut)"><a href="#" onclick="return false" style="color:var(--accent);text-decoration:none">¿Olvidaste tu contraseña?</a></div>'
+  +'<div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--line);font:500 13.5px \'Hanken Grotesk\';color:var(--mut)">¿Primera vez? <a href="#" onclick="app.go(\'welcome\');return false" style="color:var(--accent);text-decoration:none;font-weight:600">Conoce el método</a></div>'
+  +'</div></div>';
+}
 function viewHome(){
   var p=progress();var a=activeLesson();var sec=activeSection();
   var tiles=HOME_TILES.map(function(t){return '<button onclick="app.go(\''+t.go+'\')" style="text-align:left;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;cursor:pointer"><div style="width:42px;height:42px;border-radius:11px;background:var(--card2);display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:20px">'+t.icon+'</div><div style="font:600 16px \'Hanken Grotesk\';margin-bottom:5px">'+t.title+'</div><div style="font:400 13.5px/1.5 \'Hanken Grotesk\';color:var(--mut)">'+t.desc+'</div></button>';}).join('');
   var secCards=SECTIONS.map(function(s){var total=s.lessons.filter(function(l){return !l.pending;}).length;var doneN=s.lessons.filter(function(l){return !l.pending&&state.completed[l.id];}).length;var pc=total?Math.round(doneN/total*100):0;return '<button onclick="app.go(\'course\')" style="text-align:left;cursor:pointer;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span style="font:500 11px \'JetBrains Mono\';letter-spacing:.18em;color:var(--mut2)">'+s.tag+'</span><span style="font:600 12px \'Hanken Grotesk\';color:var(--accent)">'+pc+'%</span></div><div style="font:600 17px/1.2 \'Hanken Grotesk\';margin-bottom:16px">'+s.title+'</div><div style="height:5px;border-radius:5px;background:rgba(0,0,0,.07);overflow:hidden"><div style="height:100%;width:'+pc+'%;background:var(--accent);border-radius:5px"></div></div><div style="margin-top:10px;font:500 12.5px \'Hanken Grotesk\';color:var(--mut)">'+doneN+' de '+total+' clases</div></button>';}).join('');
   return '<main class="scn scr">'
-  +'<p style="font:500 13px \'Hanken Grotesk\';color:var(--mut);margin:0 0 6px">Buen camino, Valentina 👋</p>'
-  +'<h1 style="margin:0 0 24px;font:700 28px/1.12 \'Plus Jakarta Sans\';letter-spacing:-.01em">Continúa donde lo dejaste</h1>'
+  +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:24px"><div><p style="font:500 13px \'Hanken Grotesk\';color:var(--mut);margin:0 0 6px">Buen camino, Valentina 👋</p><h1 style="margin:0;font:700 28px/1.12 \'Plus Jakarta Sans\';letter-spacing:-.01em">Continúa donde lo dejaste</h1></div><div class="home-user">'+userMenu('app')+'</div></div>'
   +'<div class="home-cont">'
   +'<div class="home-vid" style="background:linear-gradient(150deg,#1C2433,#0E1119);display:flex;align-items:center;justify-content:center;overflow:hidden">'
   +'<div style="position:absolute;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(240,80,46,.28),transparent 60%);animation:floatY 6s ease-in-out infinite"></div>'
@@ -368,7 +388,7 @@ function viewResources(){
 /* ============ RENDER ============ */
 function renderBottomNav(){
   var nav=document.getElementById('bottomnav');
-  if(state.screen==='welcome'){nav.style.display='none';return;}
+  if(state.screen==='welcome'||state.screen==='login'){nav.style.display='none';return;}
   nav.style.display='flex';
   nav.innerHTML=BOTTOM.map(function(b){
     var active=(b.id===state.screen)||(b.id==='course'&&state.screen==='player');
@@ -376,18 +396,27 @@ function renderBottomNav(){
     return '<button onclick="app.go(\''+b.id+'\')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;color:'+color+';padding:4px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="'+b.d+'"/></svg><span style="font:600 10px \'Hanken Grotesk\'">'+b.label+'</span></button>';
   }).join('');
 }
+function userMenu(mode){
+  var anchor = mode==='web'
+    ? '<button onclick="app.toggleMenu()" style="display:flex;align-items:center;gap:9px;padding:5px 13px 5px 6px;background:var(--card);border:1px solid var(--line);border-radius:30px;cursor:pointer"><span style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#FFE0D6,#FFB59E);display:flex;align-items:center;justify-content:center;font:600 11px \'Plus Jakarta Sans\';color:#B23A1E">VM</span><span style="font:600 12.5px \'Hanken Grotesk\';color:var(--mut)">Valentina</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--mut)" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg></button>'
+    : '<button onclick="app.toggleMenu()" style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#FFE0D6,#FFB59E);border:1px solid var(--line);cursor:pointer;font:700 14px \'Plus Jakarta Sans\';color:#B23A1E">VM</button>';
+  var drop = state.menu ? '<div style="position:absolute;right:0;top:'+(mode==='web'?'50px':'52px')+';z-index:40;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 20px 44px -16px rgba(0,0,0,.3);padding:8px;min-width:212px;text-align:left"><div style="padding:10px 12px 12px"><div style="font:700 14px \'Plus Jakarta Sans\'">Valentina Méndez</div><div style="font:400 12.5px \'Hanken Grotesk\';color:var(--mut);margin-top:2px">valentina@email.com</div></div><button onclick="app.logout()" style="width:100%;display:flex;align-items:center;gap:10px;background:none;border:none;border-top:1px solid var(--line);cursor:pointer;padding:12px;font:600 14px \'Hanken Grotesk\';color:#D8431F;text-align:left"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Cerrar sesión</button></div>' : '';
+  var backdrop = state.menu ? '<div onclick="app.toggleMenu()" style="position:fixed;inset:0;z-index:35"></div>' : '';
+  return '<div style="position:relative;'+(mode==='web'?'margin-left:auto':'')+'">'+backdrop+anchor+drop+'</div>';
+}
 function renderTopNav(){
   var nav=document.getElementById('topnav');
-  if(state.screen==='welcome'){nav.style.display='none';nav.innerHTML='';return;}
+  if(state.screen==='welcome'||state.screen==='login'){nav.style.display='none';nav.innerHTML='';return;}
   nav.style.display='';
   var items=[['home','Inicio'],['course','Mi curso'],['dashboard','Progreso'],['resources','Recursos']];
   var links=items.map(function(it){var active=(it[0]===state.screen)||(it[0]==='course'&&state.screen==='player');return '<button onclick="app.go(\''+it[0]+'\')" style="background:'+(active?'rgba(0,0,0,.06)':'transparent')+';color:'+(active?'var(--txt)':'var(--mut)')+';border:none;cursor:pointer;padding:8px 15px;border-radius:9px;font:600 13.5px \'Hanken Grotesk\'">'+it[1]+'</button>';}).join('');
-  nav.innerHTML='<div style="display:flex;align-items:center;gap:24px;width:100%;max-width:1180px;margin:0 auto;padding:0 40px;height:64px"><button onclick="app.go(\'home\')" style="display:flex;align-items:center;gap:11px;background:none;border:none;cursor:pointer;padding:0">'+LOGO+'<span style="text-align:left;line-height:1"><span style="display:block;font:700 13px/1 \'Plus Jakarta Sans\';letter-spacing:.16em">RESONANCE</span><span style="display:block;font:500 9px/1.4 \'JetBrains Mono\';letter-spacing:.34em;color:var(--accent)">M E T H O D</span></span></button><nav style="display:flex;gap:4px;margin-left:6px">'+links+'</nav><div style="margin-left:auto;display:flex;align-items:center;gap:9px;padding:5px 13px 5px 6px;background:var(--card);border:1px solid var(--line);border-radius:30px"><span style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#FFE0D6,#FFB59E);display:flex;align-items:center;justify-content:center;font:600 11px \'Plus Jakarta Sans\';color:#B23A1E">VM</span><span style="font:600 12.5px \'Hanken Grotesk\';color:var(--mut)">Valentina</span></div></div>';
+  nav.innerHTML='<div style="display:flex;align-items:center;gap:24px;width:100%;max-width:1180px;margin:0 auto;padding:0 40px;height:64px"><button onclick="app.go(\'home\')" style="display:flex;align-items:center;gap:11px;background:none;border:none;cursor:pointer;padding:0">'+LOGO+'<span style="text-align:left;line-height:1"><span style="display:block;font:700 13px/1 \'Plus Jakarta Sans\';letter-spacing:.16em">RESONANCE</span><span style="display:block;font:500 9px/1.4 \'JetBrains Mono\';letter-spacing:.34em;color:var(--accent)">M E T H O D</span></span></button><nav style="display:flex;gap:4px;margin-left:6px">'+links+'</nav>'+userMenu('web')+'</div>';
 }
 function render(){
   var s=document.getElementById('screen');
   var v=state.screen;
   if(v==='welcome')s.innerHTML=viewWelcome();
+  else if(v==='login')s.innerHTML=viewLogin();
   else if(v==='home')s.innerHTML=viewHome();
   else if(v==='course')s.innerHTML=viewCourse();
   else if(v==='player')s.innerHTML=viewPlayer();
@@ -399,7 +428,7 @@ function render(){
 // Entrada directa: app.html#home (p.ej. tras el pago) salta la bienvenida y va a la plataforma
 (function(){
   var h=(location.hash||'').replace('#','');
-  if(['home','course','dashboard','resources'].indexOf(h)>=0) state.screen=h;
+  if(['home','course','dashboard','resources','login','welcome'].indexOf(h)>=0) state.screen=h;
 })();
 render();
 </script>
