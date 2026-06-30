@@ -14,11 +14,6 @@ html,body{margin:0;height:100%}
 body{background:var(--bg);color:var(--txt);font-family:'Hanken Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased;min-height:100%;display:flex;align-items:center;justify-content:center}
 button{font-family:inherit}
 ::-webkit-scrollbar{width:0}
-/* En pantallas anchas (entrar desde el checkout) la plataforma se muestra como un teléfono centrado */
-@media(min-width:480px){
-  body{background:radial-gradient(circle at 50% 0%, #FBF8F3, #ECE6DC);padding:22px}
-  #phone{height:min(880px,96vh);max-width:420px;border-radius:44px;border:1px solid rgba(255,255,255,.12);box-shadow:0 40px 90px -28px #000, 0 0 0 11px #13161e}
-}
 @keyframes resPulse{0%,100%{transform:scale(1);opacity:.55}50%{transform:scale(1.5);opacity:0}}
 @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 @keyframes ring{0%{transform:scale(.45);opacity:.55}100%{transform:scale(1.9);opacity:0}}
@@ -26,12 +21,48 @@ button{font-family:inherit}
 #phone{display:flex;flex-direction:column;height:100%;width:100%;background:var(--bg);overflow:hidden}
 #screen{flex:1;overflow-y:auto;overflow-x:hidden}
 .scn{animation:scn .42s cubic-bezier(.2,.7,.3,1)}
+#topnav{display:none}
+
+/* ===== layout responsive: grids que cambian entre app (móvil) y web (escritorio) ===== */
+.scr{padding:26px 22px 34px}
+.g1{display:grid;grid-template-columns:1fr;gap:14px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.home-cont{display:block;background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden}
+.home-vid{position:relative;height:170px}
+.pf-player{display:grid;grid-template-columns:1fr;gap:0}
+.pf-aside{margin-top:34px;border-top:1px solid var(--line);background:var(--panel);margin-left:-22px;margin-right:-22px;padding:20px 16px}
+.g-dash{display:grid;grid-template-columns:1fr;gap:16px}
+.res-feat{display:grid;grid-template-columns:1fr;background:linear-gradient(150deg,var(--card),var(--panel));border:1px solid var(--line);border-radius:20px;overflow:hidden}
+.res-fig{position:relative;height:170px;background:linear-gradient(160deg,#1C2433,#0C0F17);display:flex;align-items:center;justify-content:center}
+
+/* ===== MODO WEB (escritorio): barra superior, ancho completo, varias columnas ===== */
+@media(min-width:900px){
+  html,body{height:auto}
+  body{display:block;background:#fff;padding:0;min-height:100vh}
+  #phone{height:auto;min-height:100vh;max-width:none;border-radius:0;border:0;box-shadow:none;overflow:visible}
+  #screen{overflow:visible}
+  #statusbar{display:none!important}
+  #bottomnav{display:none!important}
+  #topnav{display:flex;flex-shrink:0;position:sticky;top:0;z-index:30;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .scr{max-width:1180px;margin:0 auto;padding:46px 40px 90px}
+  .scr.narrow{max-width:1000px}
+  .g1,.g2{grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+  .home-cont{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
+  .home-vid{height:auto;min-height:300px}
+  .pf-player{grid-template-columns:minmax(0,1fr) 340px;gap:34px;align-items:start}
+  .pf-aside{margin:0;border-top:0;border-left:1px solid var(--line);background:var(--panel);padding:24px 20px;border-radius:16px;position:sticky;top:88px}
+  .g-dash{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);align-items:start;gap:20px}
+  .res-feat{grid-template-columns:minmax(0,1fr) 300px}
+  .res-fig{height:auto}
+}
 </style>
 </head>
 <body>
 <div id="phone">
-  <!-- status bar -->
-  <div style="flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:14px 28px 8px;font:600 14px 'Hanken Grotesk';color:var(--txt);position:relative">
+  <!-- top nav (web) -->
+  <header id="topnav"></header>
+  <!-- status bar (app) -->
+  <div id="statusbar" style="flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:14px 28px 8px;font:600 14px 'Hanken Grotesk';color:var(--txt);position:relative">
     <span>9:41</span>
     <span style="position:absolute;left:50%;top:0;transform:translateX(-50%);width:120px;height:28px;background:#000;border-radius:0 0 20px 20px"></span>
     <span style="display:flex;gap:6px;align-items:center"><svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="4.6" y="4.5" width="3" height="7.5" rx="1"/><rect x="9.2" y="2" width="3" height="10" rx="1"/><rect x="13.8" y="0" width="3" height="12" rx="1"/></svg><svg width="24" height="12" viewBox="0 0 26 12" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="1" width="20" height="10" rx="2.6"/><rect x="2.6" y="2.6" width="15" height="6.8" rx="1.2" fill="currentColor" stroke="none"/><path d="M23.5 4.2v3.6" stroke-linecap="round"/></svg></span>
@@ -214,11 +245,11 @@ function viewHome(){
   var p=progress();var a=activeLesson();var sec=activeSection();
   var tiles=HOME_TILES.map(function(t){return '<button onclick="app.go(\''+t.go+'\')" style="text-align:left;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;cursor:pointer"><div style="width:42px;height:42px;border-radius:11px;background:var(--card2);display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:20px">'+t.icon+'</div><div style="font:600 16px \'Hanken Grotesk\';margin-bottom:5px">'+t.title+'</div><div style="font:400 13.5px/1.5 \'Hanken Grotesk\';color:var(--mut)">'+t.desc+'</div></button>';}).join('');
   var secCards=SECTIONS.map(function(s){var total=s.lessons.filter(function(l){return !l.pending;}).length;var doneN=s.lessons.filter(function(l){return !l.pending&&state.completed[l.id];}).length;var pc=total?Math.round(doneN/total*100):0;return '<button onclick="app.go(\'course\')" style="text-align:left;cursor:pointer;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span style="font:500 11px \'JetBrains Mono\';letter-spacing:.18em;color:var(--mut2)">'+s.tag+'</span><span style="font:600 12px \'Hanken Grotesk\';color:var(--accent)">'+pc+'%</span></div><div style="font:600 17px/1.2 \'Hanken Grotesk\';margin-bottom:16px">'+s.title+'</div><div style="height:5px;border-radius:5px;background:rgba(0,0,0,.07);overflow:hidden"><div style="height:100%;width:'+pc+'%;background:var(--accent);border-radius:5px"></div></div><div style="margin-top:10px;font:500 12.5px \'Hanken Grotesk\';color:var(--mut)">'+doneN+' de '+total+' clases</div></button>';}).join('');
-  return '<main class="scn" style="padding:26px 22px 34px">'
+  return '<main class="scn scr">'
   +'<p style="font:500 13px \'Hanken Grotesk\';color:var(--mut);margin:0 0 6px">Buen camino, Valentina 👋</p>'
   +'<h1 style="margin:0 0 24px;font:700 28px/1.12 \'Plus Jakarta Sans\';letter-spacing:-.01em">Continúa donde lo dejaste</h1>'
-  +'<div style="background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden">'
-  +'<div style="position:relative;height:170px;background:linear-gradient(150deg,#1C2433,#0E1119);display:flex;align-items:center;justify-content:center;overflow:hidden">'
+  +'<div class="home-cont">'
+  +'<div class="home-vid" style="background:linear-gradient(150deg,#1C2433,#0E1119);display:flex;align-items:center;justify-content:center;overflow:hidden">'
   +'<div style="position:absolute;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(240,80,46,.28),transparent 60%);animation:floatY 6s ease-in-out infinite"></div>'
   +'<button onclick="app.openLesson(\''+a.id+'\')" style="position:relative;width:66px;height:66px;border-radius:50%;background:rgba(255,255,255,.1);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.18);cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="var(--accent)"><path d="M8 5v14l11-7z"/></svg></button></div>'
   +'<div style="padding:26px 24px">'
@@ -227,9 +258,9 @@ function viewHome(){
   +'<p style="margin:0 0 20px;font:400 14.5px/1.55 \'Hanken Grotesk\';color:var(--mut)">'+esc(SUMMARIES[a.id]||'')+'</p>'
   +'<div style="display:flex;align-items:center;gap:14px"><button onclick="app.openLesson(\''+a.id+'\')" style="display:inline-flex;align-items:center;gap:9px;background:var(--accent);color:#fff;border:none;cursor:pointer;padding:13px 22px;border-radius:11px;font:700 14px \'Hanken Grotesk\'"><svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg> Reanudar</button><span style="font:500 13px \'Hanken Grotesk\';color:var(--mut2)">'+p.done+' de '+p.total+' clases</span></div>'
   +'<div style="margin-top:18px;height:6px;border-radius:6px;background:rgba(0,0,0,.07);overflow:hidden"><div style="height:100%;width:'+p.pct+'%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:6px"></div></div></div></div>'
-  +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:26px">'+tiles+'</div>'
+  +'<div class="g2" style="margin-top:26px">'+tiles+'</div>'
   +'<h3 style="margin:38px 0 16px;font:700 20px \'Plus Jakarta Sans\'">Tu programa</h3>'
-  +'<div style="display:flex;flex-direction:column;gap:12px">'+secCards+'</div></main>';
+  +'<div class="g1">'+secCards+'</div></main>';
 }
 
 function viewCourse(){
@@ -259,7 +290,7 @@ function viewCourse(){
     }).join('')+'</div>'):'';
     return '<div style="position:relative;z-index:1;display:flex;gap:14px;align-items:flex-start"><span style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:'+nodeBg+';border:2px solid '+nodeBorder+';color:'+nodeColor+';display:flex;align-items:center;justify-content:center;font:700 14px \'Plus Jakarta Sans\';margin-top:6px">'+nodeIcon+'</span><div style="flex:1;min-width:0;background:var(--card);border:1px solid '+cardBorder+';border-radius:16px;overflow:hidden"><button onclick="app.toggleSection(\''+s.id+'\')" style="width:100%;display:flex;align-items:center;gap:12px;padding:18px 18px;background:none;border:none;cursor:pointer;text-align:left"><span style="flex:1;min-width:0"><span style="display:block;font:500 11px \'JetBrains Mono\';letter-spacing:.14em;color:var(--accent);margin-bottom:4px">'+s.tag+'</span><span style="display:block;font:600 16px \'Hanken Grotesk\'">'+esc(s.title)+'</span></span><span style="font:500 12px \'Hanken Grotesk\';color:var(--mut);white-space:nowrap">'+doneN+'/'+total+'</span><span style="transform:'+(open?'rotate(180deg)':'rotate(0)')+';transition:transform .25s;color:var(--mut);display:flex"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg></span></button>'+rows+'</div></div>';
   }).join('');
-  return '<main class="scn" style="padding:26px 22px 34px">'
+  return '<main class="scn scr narrow">'
   +'<p style="font:600 12px \'JetBrains Mono\';letter-spacing:.26em;color:var(--accent);margin:0 0 10px">TU RUTA DE APRENDIZAJE</p>'
   +'<h1 style="margin:0 0 10px;font:700 28px/1.06 \'Plus Jakarta Sans\';letter-spacing:-.015em">Tu camino, paso a paso</h1>'
   +'<p style="margin:0 0 24px;font:400 15px/1.6 \'Hanken Grotesk\';color:var(--mut)">Sigue el orden: cada clase prepara la siguiente. Aquí ves dónde estás y retomas justo donde lo dejaste.</p>'
@@ -283,14 +314,14 @@ function viewPlayer(){
   }
   // outline
   var outline=SECTIONS.map(function(s){return '<div style="margin-bottom:6px"><div style="padding:10px 6px 6px;font:500 11px \'JetBrains Mono\';letter-spacing:.12em;color:var(--mut2)">'+s.tag+' · '+esc(s.title)+'</div>'+s.lessons.map(function(l){var done=!!state.completed[l.id];var current=l.id===state.activeLessonId;var pending=!!l.pending;var dotBg=done?'var(--accent)':(current?'rgba(240,80,46,.16)':'transparent');var dotBorder=(done||current)?'var(--accent)':'var(--line2)';var dotColor=done?'#fff':(current?'var(--accent)':'var(--mut2)');var dotIcon=done?'✓':(pending?'·':(current?'▶':String(l.n)));var click=pending?'':'onclick="app.openLesson(\''+l.id+'\')"';return '<button '+click+' style="width:100%;display:flex;align-items:center;gap:10px;padding:9px 8px;background:'+(current?'rgba(240,80,46,.1)':'transparent')+';border:none;border-radius:9px;cursor:'+(pending?'default':'pointer')+';text-align:left;margin-bottom:2px"><span style="width:22px;height:22px;flex-shrink:0;border-radius:50%;display:flex;align-items:center;justify-content:center;background:'+dotBg+';border:1px solid '+dotBorder+';color:'+dotColor+';font:600 10px \'Hanken Grotesk\'">'+dotIcon+'</span><span style="flex:1;font:'+((current?'600':'500'))+' 13px \'Hanken Grotesk\';color:'+(pending?'var(--mut2)':(current?'var(--accent)':'var(--txt)'))+';line-height:1.3">'+esc(l.title)+'</span><span style="font:500 11px \'JetBrains Mono\';color:var(--mut2)">'+(pending?'pronto':l.dur)+'</span></button>';}).join('')+'</div>';}).join('');
-  return '<main class="scn" style="padding:18px 22px 34px">'
+  return '<main class="scn scr"><div class="pf-player"><div>'
   +'<button onclick="app.go(\'course\')" style="display:inline-flex;align-items:center;gap:7px;background:none;border:none;color:var(--mut);cursor:pointer;font:500 13px \'Hanken Grotesk\';padding:0 0 14px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg> Volver al temario</button>'
   +'<div style="position:relative;aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:linear-gradient(150deg,#1A2230,#0C0F17);display:flex;align-items:center;justify-content:center"><div style="position:absolute;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(240,80,46,.22),transparent 60%);animation:floatY 7s ease-in-out infinite"></div><svg viewBox="0 0 800 120" preserveAspectRatio="none" style="position:absolute;left:0;right:0;bottom:18%;width:100%;height:80px;opacity:.18"><path d="M0 60 Q 40 10 80 60 T 160 60 T 240 60 T 320 60 T 400 60 T 480 60 T 560 60 T 640 60 T 720 60 T 800 60" fill="none" stroke="var(--accent)" stroke-width="2"/></svg><button style="position:relative;width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.12);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.18);cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 24 24" fill="var(--accent)"><path d="M8 5v14l11-7z"/></svg></button><div style="position:absolute;left:0;right:0;bottom:0;height:5px;background:rgba(255,255,255,.12)"><div style="height:100%;width:34%;background:var(--accent)"></div></div><span style="position:absolute;left:16px;bottom:14px;font:500 12px \'JetBrains Mono\';color:rgba(255,255,255,.7)">02:38 / '+a.dur+'</span></div>'
   +'<div style="margin-top:22px"><div style="font:500 11.5px \'JetBrains Mono\';letter-spacing:.2em;color:var(--accent)">'+esc(sec.tag)+' · Clase '+a.n+'</div><h1 style="margin:9px 0 9px;font:700 24px/1.14 \'Plus Jakarta Sans\';letter-spacing:-.01em">'+esc(a.title)+'</h1><p style="margin:0;font:400 15px/1.6 \'Hanken Grotesk\';color:var(--mut)">'+esc(SUMMARIES[a.id]||'')+'</p></div>'
   +'<button onclick="app.toggleComplete()" style="margin-top:18px;display:inline-flex;align-items:center;gap:9px;background:'+(isDone?'rgba(86,197,150,.14)':'var(--accent)')+';color:'+(isDone?'#3FA877':'#fff')+';border:1px solid '+(isDone?'rgba(86,197,150,.4)':'transparent')+';cursor:pointer;padding:13px 20px;border-radius:11px;font:700 14px \'Hanken Grotesk\'"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> '+(isDone?'Completada':'Marcar completada')+'</button>'
   +'<div style="display:flex;gap:6px;margin:26px 0 22px;border-bottom:1px solid var(--line)">'+tabs+'</div>'
-  +'<div>'+body+'</div>'
-  +'<div style="margin-top:34px;border-top:1px solid var(--line);background:var(--panel);margin-left:-22px;margin-right:-22px;padding:20px 16px"><div style="display:flex;align-items:center;justify-content:space-between;padding:0 6px 14px"><span style="font:700 14px \'Hanken Grotesk\'">Contenido del curso</span><span style="font:500 12px \'Hanken Grotesk\';color:var(--accent)">'+p.pct+'%</span></div>'+outline+'</div></main>';
+  +'<div>'+body+'</div></div>'
+  +'<aside class="pf-aside"><div style="display:flex;align-items:center;justify-content:space-between;padding:0 6px 14px"><span style="font:700 14px \'Hanken Grotesk\'">Contenido del curso</span><span style="font:500 12px \'Hanken Grotesk\';color:var(--accent)">'+p.pct+'%</span></div>'+outline+'</aside></div></main>';
 }
 
 function viewDashboard(){
@@ -308,15 +339,16 @@ function viewDashboard(){
   var scale=LEVELS.map(function(l,i){return '<span style="display:inline-flex;align-items:center;gap:6px;font:500 11px \'Hanken Grotesk\';color:var(--mut2)"><span style="width:9px;height:9px;border-radius:50%;background:'+HEAT[i]+'"></span>'+l+'</span>';}).join('');
   var evo=ZONES.map(function(z){var cells=z.evo.map(function(v){return '<div style="flex:1;height:9px;border-radius:6px;background:rgba(0,0,0,.06);overflow:hidden"><div style="height:100%;width:'+((v/3)*100)+'%;background:'+HEAT[v]+';border-radius:6px"></div></div>';}).join('');return '<div style="display:grid;grid-template-columns:74px 1fr;gap:12px;align-items:center"><span style="font:600 12.5px \'Hanken Grotesk\'">'+z.label+'</span><div style="display:flex;align-items:center;gap:6px">'+cells+'</div></div>';}).join('');
   var entries=state.sessions.map(function(s){var items=[[DQ[0],s.a1],[DQ[1],s.a2],[DQ[2],s.a3]].map(function(qi){return '<div><div style="font:500 11.5px/1.3 \'Hanken Grotesk\';color:var(--mut2);margin-bottom:5px">'+qi[0]+'</div><div style="font:400 14px/1.45 \'Hanken Grotesk\';color:#2A2D35">'+esc(qi[1])+'</div></div>';}).join('');return '<div style="border:1px solid var(--line);border-radius:14px;padding:16px 18px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font:600 13px \'Hanken Grotesk\'">'+s.title+'</span><span style="font:500 11.5px \'JetBrains Mono\';color:var(--mut2)">'+s.date+'</span></div><div style="display:flex;flex-direction:column;gap:12px">'+items+'</div></div>';}).join('');
-  return '<main class="scn" style="padding:26px 22px 34px">'
+  return '<main class="scn scr">'
   +'<h1 style="margin:0 0 6px;font:700 28px/1.12 \'Plus Jakarta Sans\';letter-spacing:-.01em">Tu progreso</h1>'
   +'<p style="margin:0 0 26px;font:400 15px \'Hanken Grotesk\';color:var(--mut)">Tu evolución y tus sensaciones — no las clases. Para las clases, ve a <strong style="color:var(--txt);font-weight:600">Mi curso</strong>.</p>'
-  +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px">'+stats+'</div>'
-  +'<section style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;margin-bottom:18px"><div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;margin-bottom:6px"><div><h2 style="margin:0;font:600 18px \'Hanken Grotesk\'">Mapa de Tensión</h2><p style="margin:4px 0 0;font:400 13px \'Hanken Grotesk\';color:var(--mut)">Toca una zona para registrar su nivel.</p></div><div style="display:flex;gap:4px;padding:4px;background:var(--panel);border:1px solid var(--line);border-radius:10px">'+weekTabs+'</div></div>'
+  +'<div class="g2" style="margin-bottom:24px">'+stats+'</div>'
+  +'<div class="g-dash">'
+  +'<section style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px"><div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;margin-bottom:6px"><div><h2 style="margin:0;font:600 18px \'Hanken Grotesk\'">Mapa de Tensión</h2><p style="margin:4px 0 0;font:400 13px \'Hanken Grotesk\';color:var(--mut)">Toca una zona para registrar su nivel.</p></div><div style="display:flex;gap:4px;padding:4px;background:var(--panel);border:1px solid var(--line);border-radius:10px">'+weekTabs+'</div></div>'
   +'<div style="display:flex;justify-content:center;margin:18px 0"><div style="position:relative;width:200px;height:320px"><svg width="200" height="320" viewBox="0 0 200 320" fill="none"><path d="M100 18 C84 18 73 31 73 49 C73 60 77 69 84 75 C80 78 70 82 70 92 L66 99 C58 103 50 110 46 124 L36 168 C34 178 44 183 49 174 L60 138 L62 150 C58 176 56 210 58 250 C59 272 62 296 66 312 C68 318 86 318 87 311 L94 250 L100 250 L106 250 L113 311 C114 318 132 318 134 312 C138 296 141 272 142 250 C144 210 142 176 138 150 L140 138 L151 174 C156 183 166 178 164 168 L154 124 C150 110 142 103 134 99 L130 92 C130 82 120 78 116 75 C123 69 127 60 127 49 C127 31 116 18 100 18 Z" fill="rgba(0,0,0,.04)" stroke="rgba(0,0,0,.14)" stroke-width="1.4"/></svg>'+dots+'</div></div>'
   +'<div style="display:flex;flex-direction:column;gap:7px">'+legendRows+'<div style="display:flex;gap:14px;margin-top:8px;padding:0 4px;flex-wrap:wrap">'+scale+'</div></div></section>'
-  +'<section style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;margin-bottom:18px"><h2 style="margin:0;font:600 18px \'Hanken Grotesk\'">Mi evolución</h2><p style="margin:4px 0 20px;font:400 13px \'Hanken Grotesk\';color:var(--mut)">Tensión por zona · semanas 1 · 4 · 8</p><div style="display:flex;flex-direction:column;gap:13px">'+evo+'</div><div style="display:flex;justify-content:space-between;margin-top:12px;padding-left:86px;font:500 11px \'JetBrains Mono\';color:var(--mut2)"><span>S1</span><span>S4</span><span>S8</span></div><blockquote style="margin:22px 0 0;padding:14px 16px;background:var(--panel);border-radius:12px;font:400 16px/1.4 \'Newsreader\',serif;font-style:italic;color:var(--mut)">«Mientras más clara es la sensación, más claro es el control sobre la voz.»</blockquote></section>'
-  +'<section style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px"><div><h2 style="margin:0;font:600 18px \'Hanken Grotesk\'">Diario de práctica</h2><p style="margin:4px 0 0;font:400 13px \'Hanken Grotesk\';color:var(--mut)">Registra tus observaciones después de cada sesión.</p></div><span style="font:500 13px \'Hanken Grotesk\';color:var(--accent)">'+state.sessions.length+'</span></div>'
+  +'<section style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;margin-bottom:18px"><h2 style="margin:0;font:600 18px \'Hanken Grotesk\'">Mi evolución</h2><p style="margin:4px 0 20px;font:400 13px \'Hanken Grotesk\';color:var(--mut)">Tensión por zona · semanas 1 · 4 · 8</p><div style="display:flex;flex-direction:column;gap:13px">'+evo+'</div><div style="display:flex;justify-content:space-between;margin-top:12px;padding-left:86px;font:500 11px \'JetBrains Mono\';color:var(--mut2)"><span>S1</span><span>S4</span><span>S8</span></div><blockquote style="margin:22px 0 0;padding:14px 16px;background:var(--panel);border-radius:12px;font:400 16px/1.4 \'Newsreader\',serif;font-style:italic;color:var(--mut)">«Mientras más clara es la sensación, más claro es el control sobre la voz.»</blockquote></section></div>'
+  +'<section style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;margin-top:18px"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px"><div><h2 style="margin:0;font:600 18px \'Hanken Grotesk\'">Diario de práctica</h2><p style="margin:4px 0 0;font:400 13px \'Hanken Grotesk\';color:var(--mut)">Registra tus observaciones después de cada sesión.</p></div><span style="font:500 13px \'Hanken Grotesk\';color:var(--accent)">'+state.sessions.length+'</span></div>'
   +'<div style="background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px"><div style="font:600 13px \'Hanken Grotesk\';margin-bottom:12px;color:var(--mut)">Nueva sesión</div><div style="display:flex;flex-direction:column;gap:10px"><input value="'+esc(state.draft.q1)+'" oninput="app.draft(\'q1\',this.value)" placeholder="'+DQ[0]+'" style="background:var(--card);border:1px solid var(--line2);border-radius:10px;padding:12px 14px;font:400 14px \'Hanken Grotesk\';color:var(--txt);outline:none"/><input value="'+esc(state.draft.q2)+'" oninput="app.draft(\'q2\',this.value)" placeholder="'+DQ[1]+'" style="background:var(--card);border:1px solid var(--line2);border-radius:10px;padding:12px 14px;font:400 14px \'Hanken Grotesk\';color:var(--txt);outline:none"/><input value="'+esc(state.draft.q3)+'" oninput="app.draft(\'q3\',this.value)" placeholder="'+DQ[2]+'" style="background:var(--card);border:1px solid var(--line2);border-radius:10px;padding:12px 14px;font:400 14px \'Hanken Grotesk\';color:var(--txt);outline:none"/></div><button onclick="app.addSession()" style="margin-top:14px;display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;padding:11px 20px;border-radius:10px;font:700 13.5px \'Hanken Grotesk\'"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> Guardar sesión</button></div>'
   +'<div style="display:flex;flex-direction:column;gap:12px">'+entries+'</div></section></main>';
 }
@@ -324,13 +356,13 @@ function viewDashboard(){
 function viewResources(){
   var pages=PDF_PAGES.map(function(pg){return '<span style="font:500 12px \'Hanken Grotesk\';color:var(--mut);padding:6px 12px;background:rgba(0,0,0,.035);border:1px solid var(--line);border-radius:20px">'+pg+'</span>';}).join('');
   var other=OTHER_RES.map(function(r){return '<div style="background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;flex-direction:column"><div style="width:44px;height:44px;border-radius:11px;background:var(--card2);display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:20px">'+r.icon+'</div><div style="font:600 16px \'Hanken Grotesk\';margin-bottom:6px">'+r.title+'</div><div style="flex:1;font:400 13.5px/1.5 \'Hanken Grotesk\';color:var(--mut);margin-bottom:16px">'+r.desc+'</div><button style="align-self:flex-start;background:rgba(0,0,0,.04);color:var(--txt);border:1px solid var(--line2);cursor:pointer;padding:9px 16px;border-radius:9px;font:600 13px \'Hanken Grotesk\'">'+r.action+'</button></div>';}).join('');
-  return '<main class="scn" style="padding:26px 22px 34px">'
+  return '<main class="scn scr narrow">'
   +'<h1 style="margin:0 0 6px;font:700 28px/1.12 \'Plus Jakarta Sans\';letter-spacing:-.01em">Recursos descargables</h1>'
   +'<p style="margin:0 0 26px;font:400 15px \'Hanken Grotesk\';color:var(--mut)">Materiales para acompañar tu práctica fuera de cámara.</p>'
-  +'<div style="background:linear-gradient(150deg,var(--card),var(--panel));border:1px solid var(--line);border-radius:20px;overflow:hidden;margin-bottom:24px">'
-  +'<div style="position:relative;height:170px;background:linear-gradient(160deg,#1C2433,#0C0F17);display:flex;align-items:center;justify-content:center"><div style="width:130px;height:170px;background:#F4F1EA;border-radius:6px;box-shadow:0 20px 50px -10px rgba(0,0,0,.6);transform:rotate(-4deg);padding:14px"><div style="font:700 6.5px \'Hanken Grotesk\';letter-spacing:.1em;color:#0A0D15">THE RESONANCE METHOD</div><div style="font:800 10px \'Plus Jakarta Sans\';color:#0A0D15;margin-top:9px;line-height:1.1">Mapa de Tensión</div><div style="margin-top:12px;display:flex;flex-direction:column;gap:6px"><div style="height:5px;width:80%;background:rgba(10,13,21,.12);border-radius:3px"></div><div style="height:5px;width:60%;background:rgba(10,13,21,.12);border-radius:3px"></div><div style="height:5px;width:72%;background:rgba(240,80,46,.5);border-radius:3px"></div><div style="height:5px;width:50%;background:rgba(10,13,21,.12);border-radius:3px"></div></div></div></div>'
-  +'<div style="padding:28px 24px"><div style="font:500 11.5px \'JetBrains Mono\';letter-spacing:.2em;color:var(--accent)">HERRAMIENTA PRINCIPAL</div><h2 style="margin:12px 0 10px;font:700 22px/1.12 \'Plus Jakarta Sans\'">Autodiagnóstico — Mapa de Tensión</h2><p style="margin:0 0 18px;font:400 15px/1.6 \'Hanken Grotesk\';color:var(--mut)">Completa el escaneo justo después del Video 3 — Diagnóstico. Guárdalo durante todo el curso: al final vas a ver cuánto cambió tu instrumento.</p><div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px">'+pages+'</div><button style="display:inline-flex;align-items:center;gap:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;cursor:pointer;padding:14px 22px;border-radius:12px;font:700 14.5px \'Hanken Grotesk\'"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg> Descargar PDF</button></div></div>'
-  +'<div style="display:flex;flex-direction:column;gap:14px">'+other+'</div></main>';
+  +'<div class="res-feat" style="margin-bottom:24px">'
+  +'<div style="padding:28px 24px"><div style="font:500 11.5px \'JetBrains Mono\';letter-spacing:.2em;color:var(--accent)">HERRAMIENTA PRINCIPAL</div><h2 style="margin:12px 0 10px;font:700 22px/1.12 \'Plus Jakarta Sans\'">Autodiagnóstico — Mapa de Tensión</h2><p style="margin:0 0 18px;font:400 15px/1.6 \'Hanken Grotesk\';color:var(--mut)">Completa el escaneo justo después del Video 3 — Diagnóstico. Guárdalo durante todo el curso: al final vas a ver cuánto cambió tu instrumento.</p><div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px">'+pages+'</div><button style="display:inline-flex;align-items:center;gap:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;cursor:pointer;padding:14px 22px;border-radius:12px;font:700 14.5px \'Hanken Grotesk\'"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg> Descargar PDF</button></div>'
+  +'<div class="res-fig"><div style="width:130px;height:170px;background:#F4F1EA;border-radius:6px;box-shadow:0 20px 50px -10px rgba(0,0,0,.6);transform:rotate(-4deg);padding:14px"><div style="font:700 6.5px \'Hanken Grotesk\';letter-spacing:.1em;color:#0A0D15">THE RESONANCE METHOD</div><div style="font:800 10px \'Plus Jakarta Sans\';color:#0A0D15;margin-top:9px;line-height:1.1">Mapa de Tensión</div><div style="margin-top:12px;display:flex;flex-direction:column;gap:6px"><div style="height:5px;width:80%;background:rgba(10,13,21,.12);border-radius:3px"></div><div style="height:5px;width:60%;background:rgba(10,13,21,.12);border-radius:3px"></div><div style="height:5px;width:72%;background:rgba(240,80,46,.5);border-radius:3px"></div><div style="height:5px;width:50%;background:rgba(10,13,21,.12);border-radius:3px"></div></div></div></div></div>'
+  +'<div class="g1">'+other+'</div></main>';
 }
 
 /* ============ RENDER ============ */
@@ -344,6 +376,14 @@ function renderBottomNav(){
     return '<button onclick="app.go(\''+b.id+'\')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;color:'+color+';padding:4px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="'+b.d+'"/></svg><span style="font:600 10px \'Hanken Grotesk\'">'+b.label+'</span></button>';
   }).join('');
 }
+function renderTopNav(){
+  var nav=document.getElementById('topnav');
+  if(state.screen==='welcome'){nav.style.display='none';nav.innerHTML='';return;}
+  nav.style.display='';
+  var items=[['home','Inicio'],['course','Mi curso'],['dashboard','Progreso'],['resources','Recursos']];
+  var links=items.map(function(it){var active=(it[0]===state.screen)||(it[0]==='course'&&state.screen==='player');return '<button onclick="app.go(\''+it[0]+'\')" style="background:'+(active?'rgba(0,0,0,.06)':'transparent')+';color:'+(active?'var(--txt)':'var(--mut)')+';border:none;cursor:pointer;padding:8px 15px;border-radius:9px;font:600 13.5px \'Hanken Grotesk\'">'+it[1]+'</button>';}).join('');
+  nav.innerHTML='<div style="display:flex;align-items:center;gap:24px;width:100%;max-width:1180px;margin:0 auto;padding:0 40px;height:64px"><button onclick="app.go(\'home\')" style="display:flex;align-items:center;gap:11px;background:none;border:none;cursor:pointer;padding:0">'+LOGO+'<span style="text-align:left;line-height:1"><span style="display:block;font:700 13px/1 \'Plus Jakarta Sans\';letter-spacing:.16em">RESONANCE</span><span style="display:block;font:500 9px/1.4 \'JetBrains Mono\';letter-spacing:.34em;color:var(--accent)">M E T H O D</span></span></button><nav style="display:flex;gap:4px;margin-left:6px">'+links+'</nav><div style="margin-left:auto;display:flex;align-items:center;gap:9px;padding:5px 13px 5px 6px;background:var(--card);border:1px solid var(--line);border-radius:30px"><span style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#FFE0D6,#FFB59E);display:flex;align-items:center;justify-content:center;font:600 11px \'Plus Jakarta Sans\';color:#B23A1E">VM</span><span style="font:600 12.5px \'Hanken Grotesk\';color:var(--mut)">Valentina</span></div></div>';
+}
 function render(){
   var s=document.getElementById('screen');
   var v=state.screen;
@@ -354,6 +394,7 @@ function render(){
   else if(v==='dashboard')s.innerHTML=viewDashboard();
   else if(v==='resources')s.innerHTML=viewResources();
   renderBottomNav();
+  renderTopNav();
 }
 // Entrada directa: app.html#home (p.ej. tras el pago) salta la bienvenida y va a la plataforma
 (function(){
