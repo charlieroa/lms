@@ -355,6 +355,11 @@ function render(){
   else if(v==='resources')s.innerHTML=viewResources();
   renderBottomNav();
 }
+// Entrada directa: app.html#home (p.ej. tras el pago) salta la bienvenida y va a la plataforma
+(function(){
+  var h=(location.hash||'').replace('#','');
+  if(['home','course','dashboard','resources'].indexOf(h)>=0) state.screen=h;
+})();
 render();
 </script>
 </body>
