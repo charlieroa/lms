@@ -394,7 +394,7 @@ var CHECKOUT_URL = "";
   var url = (CHECKOUT_URL || "").trim();
   document.querySelectorAll('[data-cta="buy"]').forEach(function(a){
     if(url){ a.href = url; a.target = "_blank"; a.rel = "noopener"; }
-    else { a.href = "#precio"; } // sin link aún → lleva al precio (no a un # muerto)
+    else { a.href = "checkout.html"; } // sin link de Hotmart aún → checkout mockup → plataforma
   });
 
   // -- Reveal on scroll --
