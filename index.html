@@ -417,7 +417,7 @@ var CHECKOUT_URL = "";
   function setView(v){
     btns.forEach(function(b){ b.classList.toggle('on', b.dataset.view===v); });
     if(v==='mobile'){
-      if(!frame.src){ frame.src = location.pathname + '?embed=1'; }
+      if(!frame.src){ frame.src = 'app.html'; }
       wrap.classList.add('show'); document.body.style.overflow='hidden';
     } else {
       wrap.classList.remove('show'); document.body.style.overflow='';

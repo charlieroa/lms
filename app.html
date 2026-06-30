@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Método Resonance — App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Newsreader:ital,opsz,wght@0,18..72,400;0,18..72,500;1,18..72,400;1,18..72,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+:root{--accent:#F0502E;--accent2:#FF7A4D;--bg:#FFFFFF;--panel:#FBF8F3;--card:#FFFFFF;--card2:#F4EFE7;--line:rgba(0,0,0,.08);--line2:rgba(0,0,0,.14);--txt:#15171C;--mut:#5C6069;--mut2:#8A909C}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--txt);font-family:'Hanken Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button{font-family:inherit}
+::-webkit-scrollbar{width:0}
+@keyframes resPulse{0%,100%{transform:scale(1);opacity:.55}50%{transform:scale(1.5);opacity:0}}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes ring{0%{transform:scale(.45);opacity:.55}100%{transform:scale(1.9);opacity:0}}
+@keyframes scn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+#phone{display:flex;flex-direction:column;height:100%;background:var(--bg);overflow:hidden}
+#screen{flex:1;overflow-y:auto;overflow-x:hidden}
+.scn{animation:scn .42s cubic-bezier(.2,.7,.3,1)}
+</style>
+</head>
+<body>
+<div id="phone">
+  <!-- status bar -->
+  <div style="flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:14px 28px 8px;font:600 14px 'Hanken Grotesk';color:var(--txt);position:relative">
+    <span>9:41</span>
+    <span style="position:absolute;left:50%;top:0;transform:translateX(-50%);width:120px;height:28px;background:#000;border-radius:0 0 20px 20px"></span>
+    <span style="display:flex;gap:6px;align-items:center"><svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="4.6" y="4.5" width="3" height="7.5" rx="1"/><rect x="9.2" y="2" width="3" height="10" rx="1"/><rect x="13.8" y="0" width="3" height="12" rx="1"/></svg><svg width="24" height="12" viewBox="0 0 26 12" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="1" width="20" height="10" rx="2.6"/><rect x="2.6" y="2.6" width="15" height="6.8" rx="1.2" fill="currentColor" stroke="none"/><path d="M23.5 4.2v3.6" stroke-linecap="round"/></svg></span>
+  </div>
+  <div id="screen"></div>
+  <!-- bottom nav -->
+  <nav id="bottomnav" style="flex-shrink:0;display:none;align-items:stretch;justify-content:space-around;padding:9px 6px 22px;background:rgba(10,13,21,.96);backdrop-filter:blur(16px);border-top:1px solid rgba(255,255,255,.06)"></nav>
+</div>
+
+<script>
+/* ============ DATA ============ */
+var SECTIONS=[
+  {id:'intro',tag:'Introducción',title:'Bienvenido a tu instrumento',subtitle:'3 videos · sin ejercicio práctico en cámara',lessons:[
+    {n:1,id:'intro-1',title:'Bienvenida al Método Resonance',dur:'4:20',kind:'Clase'},
+    {n:2,id:'intro-2',title:'Cómo usar este curso',dur:'5:10',kind:'Clase'},
+    {n:3,id:'intro-3',title:'Diagnóstico — Encuentra tu tensión',dur:'7:45',kind:'Clase'},
+  ]},
+  {id:'m01',tag:'Módulo 01',title:'Los Pilares del Método',subtitle:'Resonancia · Relajación · Sensación',lessons:[
+    {n:1,id:'m01-1',title:'La Resonancia',dur:'9:30',kind:'Clase'},
+    {n:2,id:'m01-2',title:'La Relajación',dur:'7:15',kind:'Clase'},
+    {n:3,id:'m01-3',title:'La Sensación — el idioma del instrumento',dur:'6:40',kind:'Clase'},
+    {n:4,id:'m01-4',title:'Video de ejercicios',dur:'—',kind:'Práctica',pending:true},
+  ]},
+  {id:'m02',tag:'Módulo 02',title:'Anatomía del Instrumento',subtitle:'Conoce lo que hay adentro',lessons:[
+    {n:1,id:'m02-1',title:'Las cuerdas vocales',dur:'6:05',kind:'Clase'},
+    {n:2,id:'m02-2',title:'La laringe',dur:'5:50',kind:'Clase'},
+    {n:3,id:'m02-3',title:'Los resonadores',dur:'7:20',kind:'Clase'},
+    {n:4,id:'m02-4',title:'Tu tesitura — el diagnóstico real',dur:'8:10',kind:'Clase'},
+    {n:5,id:'m02-5',title:'Video de ejercicios',dur:'—',kind:'Práctica',pending:true},
+  ]},
+  {id:'m03',tag:'Módulo 03',title:'La Coordinación de la Voz',subtitle:'El equilibrio entre los músculos vocales',lessons:[
+    {n:1,id:'m03-1',title:'Por qué los registros están mal entendidos',dur:'7:00',kind:'Clase'},
+    {n:2,id:'m03-2',title:'Qué está pasando dentro de tu voz',dur:'9:15',kind:'Clase'},
+    {n:3,id:'m03-3',title:'Auto-diagnóstico — reconoce y libera tu tensión',dur:'10:30',kind:'Clase'},
+    {n:4,id:'m03-4',title:'Videos 4 · 5 · 6',dur:'—',kind:'Práctica',pending:true},
+  ]},
+];
+var SUMMARIES={
+  'intro-1':'Por qué decidiste trabajar tu voz, y qué hace distinto a este método nacido de años formando voces.',
+  'intro-2':'El mapa del curso: primero sentir, después soltar. No te saltes pasos.',
+  'intro-3':'Antes de cualquier ejercicio, identifica dónde vive tu tensión cuando cantas.',
+  'm01-1':'La resonancia no se fabrica: aparece cuando el sonido tiene espacio para viajar.',
+  'm01-2':'La voz mejora cuando dejas de hacer la fuerza que no necesitas.',
+  'm01-3':'La sensación es el idioma del instrumento — la única información real que tienes al cantar.',
+  'm02-1':'No son cuerdas, son pliegues. Cómo nace realmente la voz.',
+  'm02-2':'La casa de tus pliegues. Por qué buscamos una laringe libre, no baja.',
+  'm02-3':'Faringe, boca y cavidad nasal: donde el sonido se convierte en voz.',
+  'm02-4':'Explora tu rango real: zona de confort, de límite y la imposible por ahora.',
+  'm03-1':'Un registro no es un lugar. Es una coordinación.',
+  'm03-2':'Tiroaritenoideo y cricotiroideo: dos músculos, dos sensaciones, un solo equilibrio de aire.',
+  'm03-3':'Tipo A o Tipo B: identifica tu tensión y aprende a liberarla.',
+};
+var TRANSCRIPTS={
+  'intro-3':[
+    {t:'p',x:'Antes de enseñarte cualquier ejercicio, necesito que hagamos algo juntos. Necesito que te conozcas.'},
+    {t:'p',x:'No me refiero a saber si tienes buena voz o mala voz. Eso no existe. Me refiero a algo mucho más concreto: necesito que identifiques dónde está la tensión en tu cuerpo cuando cantas.'},
+    {t:'p',x:'Porque la tensión es el obstáculo. Siempre. Y cada persona la carga en un lugar diferente.'},
+    {t:'h',x:'PARTE 1 — PREPARACIÓN'},
+    {t:'p',x:'Párate. Los pies al ancho de los hombros. Los brazos sueltos a los lados. Cierra los ojos si puedes. Respira natural. No hagas nada especial con la respiración: solo deja que ocurra.'},
+    {t:'p',x:'Ahora haz un escaneo mental de tu cuerpo, de arriba hacia abajo. ¿Cómo está tu mandíbula? ¿Dónde está tu lengua? ¿Cómo están tus hombros?'},
+    {t:'h',x:'PARTE 2 — EL TEST VOCAL'},
+    {t:'p',x:'Emite una nota cómoda. Un «Ahhh» sostenido, en un tono donde te sientas cómodo. Sostén 5 segundos. ¿Tu mandíbula se tensó? ¿Tu cuello participó? ¿Tu lengua se movió hacia atrás?'},
+    {t:'h',x:'PARTE 3 — AHORA EN ALTURA'},
+    {t:'p',x:'Sube un par de tonos. «Ahhh» otra vez, 5 segundos. ¿Qué cambió en tu cuerpo cuando subiste la nota? Eso que acabas de notar es exactamente lo que vamos a trabajar.'},
+    {t:'q',x:'«¿Estoy empujando… o estoy dejando que ocurra?»'},
+    {t:'p',x:'Descarga tu Autodiagnóstico — Mapa de Tensión y complétalo ahora. Lo necesitarás al final del curso. Nos vemos en el Módulo 1.'},
+  ],
+  'm01-1':[
+    {t:'p',x:'Quiero empezar hablando de algo que probablemente has escuchado de mí muchas veces: la resonancia.'},
+    {t:'p',x:'La resonancia ocurre cuando un objeto vibra y esa vibración coincide con su frecuencia natural. La vibración se amplifica: el sonido crece, se expande, se enriquece. Por eso en la música existen las cajas de resonancia.'},
+    {t:'p',x:'Con la voz pasa algo parecido. Las cuerdas vocales generan una vibración muy pequeña, pero ese sonido viaja por tres cavidades que funcionan como resonadores naturales: la faríngea, la oral y la nasal.'},
+    {t:'q',x:'«La resonancia no se fabrica. Aparece cuando el sonido tiene espacio para viajar.»'},
+    {t:'p',x:'Si hay tensión en la garganta, si la mandíbula está rígida, si la lengua empuja hacia atrás, el sonido encuentra obstáculos y no puede expandirse. Por eso no buscamos forzar la resonancia: liberamos el camino.'},
+    {t:'h',x:'LOS SENOS PARANASALES'},
+    {t:'p',x:'Dentro de tu cráneo hay cuatro pares de cámaras llenas de aire: los senos maxilares, frontales, etmoidales y esfenoidales. Son resonadores reales, como resonadores de Helmholtz.'},
+    {t:'p',x:'Cuando la voz está libre de tensiones, esos resonadores se activan solos. No tienes que hacer nada para ponerlos a sonar. Lo que sí puedes hacer es sentirlos.'},
+    {t:'q',x:'«Los resonadores no se fabrican. Aparecen cuando la voz está libre.»'},
+  ],
+  'm03-2':[
+    {t:'p',x:'Pon la mano en el pecho. Emite una nota cómoda, grave o media, donde te sientas bien. ¿Sientes la vibración ahí? Eso es el tiroaritenoideo trabajando: da peso, cuerpo, presencia.'},
+    {t:'p',x:'Ahora imita una sirena muy suave, un «uuu» que sube despacio. En algún punto el sonido se aligeró: ese es el cricotiroideo, que estira y afina los pliegues.'},
+    {t:'p',x:'Dos músculos. Dos sensaciones. Trabajan en relevo: uno cede mientras el otro toma protagonismo. Ese es el equilibrio, la coordinación real.'},
+    {t:'q',x:'«La voz integrada no se impone — se equilibra.»'},
+    {t:'p',x:'¿De dónde vienen los gallos y los quiebres? No de los músculos. Vienen del aire. Y no se trata solo de tener mucho aire: el problema es un aire desequilibrado. Tanto el exceso como la falta generan tensión.'},
+    {t:'q',x:'«La voz no se quiebra por falta de fuerza. Se quiebra por desequilibrio de aire.»'},
+  ],
+};
+var MANTRAS=['«No puedo relajar lo que no soy capaz de sentir.»','«Primero sentir. Después ajustar.»','«Mientras más clara es la sensación, más claro es el control sobre la voz.»'];
+var ZONES=[
+  {id:'rostro',label:'Rostro',top:'9%',left:'50%',evo:[3,2,1]},
+  {id:'mandibula',label:'Mandíbula',top:'17%',left:'63%',evo:[3,2,1]},
+  {id:'lengua',label:'Lengua',top:'20%',left:'38%',evo:[2,2,1]},
+  {id:'laringe',label:'Laringe',top:'29%',left:'50%',evo:[3,1,0]},
+  {id:'cuello',label:'Cuello',top:'25%',left:'35%',evo:[2,2,1]},
+  {id:'hombros',label:'Hombros',top:'34%',left:'74%',evo:[2,1,0]},
+  {id:'abdomen',label:'Abdomen',top:'56%',left:'50%',evo:[2,1,1]},
+];
+var LEVELS=['Sin tensión','Leve','Moderada','Alta'];
+var HEAT=['#56C596','#E8C65A','#E89B4C','#E0625C'];
+var WEEKS=[{id:0,label:'Sem. 1'},{id:1,label:'Sem. 4'},{id:2,label:'Sem. 8'}];
+var DQ=['¿Qué zona sentiste más tensa hoy?','¿Pudiste soltar algo que antes no podías?','¿Dónde apareció la resonancia?'];
+var HOME_TILES=[
+  {icon:'🎯',title:'Mapa de Tensión',desc:'Mide tu instrumento por zonas y semana.',go:'dashboard'},
+  {icon:'📓',title:'Diario de práctica',desc:'Registra lo que sentiste tras cada sesión.',go:'dashboard'},
+  {icon:'📄',title:'Recursos',desc:'Descarga el Autodiagnóstico en PDF.',go:'resources'},
+];
+var PDF_PAGES=['Escaneo corporal · 7 zonas','Mi evolución · S1·4·8','Notas de práctica · 6 sesiones','Los 3 mantras'];
+var OTHER_RES=[
+  {icon:'🎬',title:'Guía de los 3 videos de intro',desc:'Bienvenida, cómo usar el curso y el diagnóstico inicial.',action:'Ver guía'},
+  {icon:'🫁',title:'Mapa de resonadores',desc:'Los cuatro pares de senos paranasales, ilustrados.',action:'Descargar'},
+  {icon:'🔖',title:'Tarjeta de mantras',desc:'Los tres mantras del método para imprimir.',action:'Descargar'},
+];
+var BOTTOM=[
+  {id:'home',label:'Inicio',d:'M3 11l9-7 9 7M5 10v10h14V10'},
+  {id:'course',label:'Curso',d:'M4 5h16v14H4zM10 9l5 3-5 3z'},
+  {id:'dashboard',label:'Progreso',d:'M4 13h6V4H4zM14 20h6v-9h-6zM14 7h6V4h-6zM4 20h6v-4H4z'},
+  {id:'resources',label:'Recursos',d:'M14 3H6v18h12V9zM14 3v6h4'},
+];
+
+/* ============ STATE ============ */
+var state={
+  screen:'welcome',
+  activeLessonId:'intro-3',
+  completed:{'intro-1':true,'intro-2':true},
+  openSection:'intro',
+  playerTab:'guion',
+  weekSel:0,
+  levels:Object.fromEntries(ZONES.map(function(z){return [z.id,z.evo[0]];})),
+  draft:{q1:'',q2:'',q3:''},
+  sessions:[
+    {date:'12 mar',title:'Sesión 1',a1:'Mandíbula y laringe, sobre todo al subir.',a2:'Solté un poco la mandíbula con el pre-bostezo.',a3:'Un cosquilleo entre los ojos al cerrar la boca.'},
+    {date:'15 mar',title:'Sesión 2',a1:'El cuello, apenas subí de tono.',a2:'Sí — bajé los hombros y el aire se calmó.',a3:'En los pómulos, más brillo que ayer.'},
+  ],
+};
+
+/* ============ HELPERS ============ */
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function hexA(hex,a){var n=parseInt(hex.slice(1),16);return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')';}
+function flatPub(){var a=[];SECTIONS.forEach(function(s){s.lessons.forEach(function(l){if(!l.pending)a.push(l);});});return a;}
+function progress(){var flat=flatPub();var done=flat.filter(function(l){return state.completed[l.id];}).length;var total=flat.length;return {done:done,total:total,pct:Math.round(done/total*100)};}
+function activeLesson(){return flatPub().find(function(l){return l.id===state.activeLessonId;})||SECTIONS[0].lessons[0];}
+function activeSection(){return SECTIONS.find(function(s){return s.lessons.some(function(l){return l.id===state.activeLessonId;});})||SECTIONS[0];}
+
+/* ============ ACTIONS (global) ============ */
+var app={
+  go:function(s){state.screen=s;render();document.getElementById('screen').scrollTop=0;},
+  openLesson:function(id){state.activeLessonId=id;state.screen='player';state.playerTab='guion';render();document.getElementById('screen').scrollTop=0;},
+  toggleSection:function(id){state.openSection=state.openSection===id?null:id;render();},
+  toggleComplete:function(){var id=state.activeLessonId;if(state.completed[id])delete state.completed[id];else state.completed[id]=true;render();},
+  cycleZone:function(id){state.levels[id]=(state.levels[id]+1)%4;render();},
+  setWeek:function(w){var lv={};ZONES.forEach(function(z){lv[z.id]=z.evo[w];});state.levels=lv;state.weekSel=w;render();},
+  setTab:function(t){state.playerTab=t;render();},
+  draft:function(k,v){state.draft[k]=v;},
+  addSession:function(){var d=state.draft;if(!d.q1&&!d.q2&&!d.q3)return;var m=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];var dt=new Date();state.sessions.unshift({date:dt.getDate()+' '+m[dt.getMonth()],title:'Sesión '+(state.sessions.length+1),a1:d.q1||'—',a2:d.q2||'—',a3:d.q3||'—'});state.draft={q1:'',q2:'',q3:''};render();},
+};
+
+/* ============ SCREENS ============ */
+var LOGO='<span style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9px;background:linear-gradient(140deg,var(--accent),var(--accent2))"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M3 12h2l2-6 3 14 3-18 3 14 2-4h3"/></svg></span>';
+
+function viewWelcome(){
+  return '<div class="scn" style="position:relative;min-height:100%;display:flex;flex-direction:column;align-items:center;text-align:center;padding:26px 28px 34px;background:radial-gradient(125% 80% at 50% 0%, #FFFFFF, #F4EFE7 65%);overflow:hidden">'
+  +'<div style="position:absolute;top:150px;left:50%;transform:translateX(-50%);width:0;height:0;pointer-events:none">'
+  +'<span style="position:absolute;top:50%;left:50%;width:340px;height:340px;margin:-170px 0 0 -170px;border-radius:50%;border:1px solid rgba(240,80,46,.45);animation:ring 5s cubic-bezier(.2,.6,.3,1) infinite"></span>'
+  +'<span style="position:absolute;top:50%;left:50%;width:340px;height:340px;margin:-170px 0 0 -170px;border-radius:50%;border:1px solid rgba(240,80,46,.45);animation:ring 5s cubic-bezier(.2,.6,.3,1) 1.6s infinite"></span>'
+  +'<span style="position:absolute;top:50%;left:50%;width:340px;height:340px;margin:-170px 0 0 -170px;border-radius:50%;border:1px solid rgba(240,80,46,.45);animation:ring 5s cubic-bezier(.2,.6,.3,1) 3.2s infinite"></span></div>'
+  +'<div style="display:flex;align-items:center;gap:10px;margin-top:6px">'+LOGO+'<span style="line-height:1;text-align:left"><span style="display:block;font:700 13px/1 \'Plus Jakarta Sans\';letter-spacing:.16em">RESONANCE</span><span style="display:block;font:500 9px/1.4 \'JetBrains Mono\';letter-spacing:.34em;color:var(--accent)">M E T H O D</span></span></div>'
+  +'<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">'
+  +'<div style="position:relative;width:128px;height:128px;display:flex;align-items:center;justify-content:center;margin-bottom:22px">'
+  +'<span style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle, rgba(240,80,46,.4), transparent 70%);filter:blur(6px);animation:resPulse 4s ease-in-out infinite"></span>'
+  +'<span style="position:relative;width:84px;height:84px;border-radius:50%;background:linear-gradient(140deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;box-shadow:0 16px 40px -8px rgba(240,80,46,.5)"><svg width="30" height="30" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></span></div>'
+  +'<h1 style="margin:0;font:800 32px/1.08 \'Plus Jakarta Sans\';letter-spacing:-.02em;max-width:300px">Aprende a sentir tu instrumento</h1>'
+  +'<p style="margin:14px 0 0;font:400 15.5px/1.55 \'Hanken Grotesk\';color:var(--mut);max-width:280px">Técnica vocal sensorial. Primero sentir, después soltar. La resonancia aparece sola.</p></div>'
+  +'<div style="width:100%;display:flex;flex-direction:column;gap:11px">'
+  +'<button onclick="app.go(\'home\')" style="width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;cursor:pointer;padding:16px;border-radius:14px;font:700 15.5px \'Plus Jakarta Sans\';box-shadow:0 14px 36px -12px rgba(240,80,46,.55)">Comenzar</button>'
+  +'<button onclick="app.go(\'home\')" style="width:100%;background:rgba(0,0,0,.04);color:var(--txt);border:1px solid var(--line2);cursor:pointer;padding:15px;border-radius:14px;font:600 15px \'Hanken Grotesk\'">Ya tengo cuenta</button>'
+  +'<div style="display:flex;gap:6px;justify-content:center;margin-top:12px"><span style="width:22px;height:5px;border-radius:5px;background:var(--accent)"></span><span style="width:5px;height:5px;border-radius:5px;background:rgba(0,0,0,.14)"></span><span style="width:5px;height:5px;border-radius:5px;background:rgba(0,0,0,.14)"></span></div></div></div>';
+}
+
+function viewHome(){
+  var p=progress();var a=activeLesson();var sec=activeSection();
+  var tiles=HOME_TILES.map(function(t){return '<button onclick="app.go(\''+t.go+'\')" style="text-align:left;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;cursor:pointer"><div style="width:42px;height:42px;border-radius:11px;background:var(--card2);display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:20px">'+t.icon+'</div><div style="font:600 16px \'Hanken Grotesk\';margin-bottom:5px">'+t.title+'</div><div style="font:400 13.5px/1.5 \'Hanken Grotesk\';color:var(--mut)">'+t.desc+'</div></button>';}).join('');
+  var secCards=SECTIONS.map(function(s){var total=s.lessons.filter(function(l){return !l.pending;}).length;var doneN=s.lessons.filter(function(l){return !l.pending&&state.completed[l.id];}).length;var pc=total?Math.round(doneN/total*100):0;return '<button onclick="app.go(\'course\')" style="text-align:left;cursor:pointer;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span style="font:500 11px \'JetBrains Mono\';letter-spacing:.18em;color:var(--mut2)">'+s.tag+'</span><span style="font:600 12px \'Hanken Grotesk\';color:var(--accent)">'+pc+'%</span></div><div style="font:600 17px/1.2 \'Hanken Grotesk\';margin-bottom:16px">'+s.title+'</div><div style="height:5px;border-radius:5px;background:rgba(0,0,0,.07);overflow:hidden"><div style="height:100%;width:'+pc+'%;background:var(--accent);border-radius:5px"></div></div><div style="margin-top:10px;font:500 12.5px \'Hanken Grotesk\';color:var(--mut)">'+doneN+' de '+total+' clases</div></button>';}).join('');
+  return '<main class="scn" style="padding:26px 22px 34px">'
+  +'<p style="font:500 13px \'Hanken Grotesk\';color:var(--mut);margin:0 0 6px">Buen camino, Valentina 👋</p>'
+  +'<h1 style="margin:0 0 24px;font:700 28px/1.12 \'Plus Jakarta Sans\';letter-spacing:-.01em">Continúa donde lo dejaste</h1>'
+  +'<div style="background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden">'
+  +'<div style="position:relative;height:170px;background:linear-gradient(150deg,#1C2433,#0E1119);display:flex;align-items:center;justify-content:center;overflow:hidden">'
+  +'<div style="position:absolute;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(240,80,46,.28),transparent 60%);animation:floatY 6s ease-in-out infinite"></div>'
+  +'<button onclick="app.openLesson(\''+a.id+'\')" style="position:relative;width:66px;height:66px;border-radius:50%;background:rgba(255,255,255,.1);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.18);cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="var(--accent)"><path d="M8 5v14l11-7z"/></svg></button></div>'
+  +'<div style="padding:26px 24px">'
+  +'<div style="font:500 11.5px \'JetBrains Mono\';letter-spacing:.2em;color:var(--accent)">'+esc(sec.tag)+' · Clase '+a.n+'</div>'
+  +'<h2 style="margin:10px 0 8px;font:600 22px/1.2 \'Hanken Grotesk\'">'+esc(a.title)+'</h2>'
+  +'<p style="margin:0 0 20px;font:400 14.5px/1.55 \'Hanken Grotesk\';color:var(--mut)">'+esc(SUMMARIES[a.id]||'')+'</p>'
+  +'<div style="display:flex;align-items:center;gap:14px"><button onclick="app.openLesson(\''+a.id+'\')" style="display:inline-flex;align-items:center;gap:9px;background:var(--accent);color:#fff;border:none;cursor:pointer;padding:13px 22px;border-radius:11px;font:700 14px \'Hanken Grotesk\'"><svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg> Reanudar</button><span style="font:500 13px \'Hanken Grotesk\';color:var(--mut2)">'+p.done+' de '+p.total+' clases</span></div>'
+  +'<div style="margin-top:18px;height:6px;border-radius:6px;background:rgba(0,0,0,.07);overflow:hidden"><div style="height:100%;width:'+p.pct+'%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:6px"></div></div></div></div>'
+  +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:26px">'+tiles+'</div>'
+  +'<h3 style="margin:38px 0 16px;font:700 20px \'Plus Jakarta Sans\'">Tu programa</h3>'
+  +'<div style="display:flex;flex-direction:column;gap:12px">'+secCards+'</div></main>';
+}
+
+function viewCourse(){
+  var p=progress();var a=activeLesson();var sec=activeSection();
+  var path=SECTIONS.map(function(s,si){
+    var total=s.lessons.filter(function(l){return !l.pending;}).length;
+    var doneN=s.lessons.filter(function(l){return !l.pending&&state.completed[l.id];}).length;
+    var secDone=total>0&&doneN===total;
+    var secCurrent=s.lessons.some(function(l){return l.id===state.activeLessonId;});
+    var open=state.openSection===s.id;
+    var nodeBg=secDone?'var(--accent)':(secCurrent?'rgba(240,80,46,.12)':'var(--card)');
+    var nodeBorder=(secDone||secCurrent)?'var(--accent)':'var(--line2)';
+    var nodeColor=secDone?'#fff':(secCurrent?'var(--accent)':'var(--mut2)');
+    var nodeIcon=secDone?'✓':String(si+1);
+    var cardBorder=secCurrent?'var(--accent)':'var(--line)';
+    var rows=open?('<div style="border-top:1px solid var(--line)">'+s.lessons.map(function(l){
+      var done=!!state.completed[l.id];var current=l.id===state.activeLessonId;var pending=!!l.pending;
+      var dotBg=done?'var(--accent)':(current?'rgba(240,80,46,.16)':'transparent');
+      var dotBorder=(done||current)?'var(--accent)':'var(--line2)';
+      var dotColor=done?'#fff':(current?'var(--accent)':'var(--mut2)');
+      var dotIcon=done?'✓':(pending?'·':(current?'▶':String(l.n)));
+      var titleColor=pending?'var(--mut2)':(current?'var(--accent)':'var(--txt)');
+      var titleFont=(current?'600':'500')+' 14px \'Hanken Grotesk\'';
+      var chip=current?'<span style="font:700 9px \'Hanken Grotesk\';letter-spacing:.06em;color:#fff;background:var(--accent);padding:3px 8px;border-radius:20px;white-space:nowrap">CONTINUAR</span>':'';
+      var click=pending?'':'onclick="app.openLesson(\''+l.id+'\')"';
+      return '<button '+click+' style="width:100%;display:flex;align-items:center;gap:13px;padding:14px 18px;background:'+(current?'rgba(240,80,46,.06)':'transparent')+';border:none;border-top:1px solid rgba(0,0,0,.035);cursor:'+(pending?'default':'pointer')+';text-align:left"><span style="width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:'+dotBg+';border:1px solid '+dotBorder+';color:'+dotColor+';font:600 11px \'Hanken Grotesk\'">'+dotIcon+'</span><span style="flex:1;font:'+titleFont+';color:'+titleColor+'">'+esc(l.title)+'</span>'+chip+'<span style="font:500 12px \'JetBrains Mono\';color:var(--mut);min-width:38px;text-align:right">'+(pending?'pronto':l.dur)+'</span></button>';
+    }).join('')+'</div>'):'';
+    return '<div style="position:relative;z-index:1;display:flex;gap:14px;align-items:flex-start"><span style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:'+nodeBg+';border:2px solid '+nodeBorder+';color:'+nodeColor+';display:flex;align-items:center;justify-content:center;font:700 14px \'Plus Jakarta Sans\';margin-top:6px">'+nodeIcon+'</span><div style="flex:1;min-width:0;background:var(--card);border:1px solid '+cardBorder+';border-radius:16px;overflow:hidden"><button onclick="app.toggleSection(\''+s.id+'\')" style="width:100%;display:flex;align-items:center;gap:12px;padding:18px 18px;background:none;border:none;cursor:pointer;text-align:left"><span style="flex:1;min-width:0"><span style="display:block;font:500 11px \'JetBrains Mono\';letter-spacing:.14em;color:var(--accent);margin-bottom:4px">'+s.tag+'</span><span style="display:block;font:600 16px \'Hanken Grotesk\'">'+esc(s.title)+'</span></span><span style="font:500 12px \'Hanken Grotesk\';color:var(--mut);white-space:nowrap">'+doneN+'/'+total+'</span><span style="transform:'+(open?'rotate(180deg)':'rotate(0)')+';transition:transform .25s;color:var(--mut);display:flex"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg></span></button>'+rows+'</div></div>';
+  }).join('');
+  return '<main class="scn" style="padding:26px 22px 34px">'
+  +'<p style="font:600 12px \'JetBrains Mono\';letter-spacing:.26em;color:var(--accent);margin:0 0 10px">TU RUTA DE APRENDIZAJE</p>'
+  +'<h1 style="margin:0 0 10px;font:700 28px/1.06 \'Plus Jakarta Sans\';letter-spacing:-.015em">Tu camino, paso a paso</h1>'
+  +'<p style="margin:0 0 24px;font:400 15px/1.6 \'Hanken Grotesk\';color:var(--mut)">Sigue el orden: cada clase prepara la siguiente. Aquí ves dónde estás y retomas justo donde lo dejaste.</p>'
+  +'<div style="display:flex;align-items:center;gap:16px;background:linear-gradient(135deg,#FFF1EC,#FFF8F4);border:1px solid #FBD8CC;border-radius:18px;padding:18px 18px;margin-bottom:30px"><span style="flex-shrink:0;width:46px;height:46px;border-radius:14px;background:var(--accent);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px -10px rgba(240,80,46,.6)"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></span><div style="flex:1;min-width:0"><div style="font:600 10.5px \'JetBrains Mono\';letter-spacing:.14em;color:var(--accent);margin-bottom:6px">CONTINÚA AQUÍ · '+esc(sec.tag)+' · Clase '+a.n+'</div><div style="font:700 15px \'Plus Jakarta Sans\';margin-bottom:10px">'+esc(a.title)+'</div><div style="height:6px;border-radius:6px;background:rgba(0,0,0,.08);overflow:hidden"><div style="height:100%;width:'+p.pct+'%;background:var(--accent);border-radius:6px"></div></div></div></div>'
+  +'<div style="display:flex;align-items:baseline;gap:9px;margin-bottom:16px"><span style="font:700 16px \'Plus Jakarta Sans\'">El temario</span><span style="font:500 12.5px \'Hanken Grotesk\';color:var(--mut2)">'+p.total+' clases · 4 secciones</span></div>'
+  +'<div style="position:relative;display:flex;flex-direction:column;gap:12px"><div style="position:absolute;left:17px;top:26px;bottom:26px;width:2px;background:rgba(0,0,0,.1);z-index:0"></div>'+path+'</div></main>';
+}
+
+function viewPlayer(){
+  var a=activeLesson();var sec=activeSection();var p=progress();
+  var isDone=!!state.completed[a.id];
+  var tr=(TRANSCRIPTS[a.id]||[{t:'p',x:SUMMARIES[a.id]||'Transcripción de esta clase.'},{t:'p',x:'La transcripción completa de esta clase estará disponible próximamente. Mientras tanto, recuerda: primero sentir, después ajustar.'},{t:'q',x:MANTRAS[2]}]);
+  var tabs=[['guion','Guion'],['notas','Mis notas'],['recursos','Recursos']].map(function(t){var on=state.playerTab===t[0];return '<button onclick="app.setTab(\''+t[0]+'\')" style="background:none;border:none;border-bottom:2px solid '+(on?'var(--accent)':'transparent')+';color:'+(on?'var(--txt)':'var(--mut)')+';cursor:pointer;padding:10px 2px;margin-right:18px;font:600 14px \'Hanken Grotesk\'">'+t[1]+'</button>';}).join('');
+  var body='';
+  if(state.playerTab==='guion'){
+    body=tr.map(function(pa){if(pa.t==='p')return '<p style="margin:0 0 18px;font:400 16px/1.7 \'Hanken Grotesk\';color:#2A2D35">'+esc(pa.x)+'</p>';if(pa.t==='h')return '<h4 style="margin:30px 0 12px;font:600 12px \'JetBrains Mono\';letter-spacing:.16em;color:var(--accent)">'+esc(pa.x)+'</h4>';return '<blockquote style="margin:26px 0;padding:6px 0 6px 22px;border-left:2px solid var(--accent);font:400 22px/1.4 \'Newsreader\',serif;font-style:italic;color:var(--txt)">'+esc(pa.x)+'</blockquote>';}).join('');
+  } else if(state.playerTab==='notas'){
+    body='<textarea placeholder="Escribe lo que sentiste en esta clase… ¿qué zona estaba tensa? ¿qué soltaste?" style="width:100%;min-height:150px;resize:vertical;background:var(--card);border:1px solid var(--line2);border-radius:14px;padding:16px;font:400 15px/1.6 \'Hanken Grotesk\';color:var(--txt);outline:none"></textarea><div style="margin-top:18px;padding:18px;background:var(--panel);border:1px solid var(--line);border-radius:14px"><div style="font:600 13px \'Hanken Grotesk\';color:var(--mut);margin-bottom:10px">Los tres mantras del método</div>'+MANTRAS.map(function(m){return '<p style="margin:0 0 8px;font:400 17px/1.4 \'Newsreader\',serif;font-style:italic">'+esc(m)+'</p>';}).join('')+'</div>';
+  } else {
+    body='<button onclick="app.go(\'resources\')" style="display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;cursor:pointer"><span style="width:44px;height:44px;border-radius:11px;background:rgba(240,80,46,.14);display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3 3 3-3"/></svg></span><span style="flex:1"><span style="display:block;font:600 15px \'Hanken Grotesk\'">Autodiagnóstico — Mapa de Tensión</span><span style="display:block;font:400 13px \'Hanken Grotesk\';color:var(--mut);margin-top:3px">PDF · 6 páginas · complétalo después de esta clase</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--mut)" stroke-width="2.2"><path d="M9 18l6-6-6-6"/></svg></button>';
+  }
+  // outline
+  var outline=SECTIONS.map(function(s){return '<div style="margin-bottom:6px"><div style="padding:10px 6px 6px;font:500 11px \'JetBrains Mono\';letter-spacing:.12em;color:var(--mut2)">'+s.tag+' · '+esc(s.title)+'</div>'+s.lessons.map(function(l){var done=!!state.completed[l.id];var current=l.id===state.activeLessonId;var pending=!!l.pending;var dotBg=done?'var(--accent)':(current?'rgba(240,80,46,.16)':'transparent');var dotBorder=(done||current)?'var(--accent)':'var(--line2)';var dotColor=done?'#fff':(current?'var(--accent)':'var(--mut2)');var dotIcon=done?'✓':(pending?'·':(current?'▶':String(l.n)));var click=pending?'':'onclick="app.openLesson(\''+l.id+'\')"';return '<button '+click+' style="width:100%;display:flex;align-items:center;gap:10px;padding:9px 8px;background:'+(current?'rgba(240,80,46,.1)':'transparent')+';border:none;border-radius:9px;cursor:'+(pending?'default':'pointer')+';text-align:left;margin-bottom:2px"><span style="width:22px;height:22px;flex-shrink:0;border-radius:50%;display:flex;align-items:center;justify-content:center;background:'+dotBg+';border:1px solid '+dotBorder+';color:'+dotColor+';font:600 10px \'Hanken Grotesk\'">'+dotIcon+'</span><span style="flex:1;font:'+((current?'600':'500'))+' 13px \'Hanken Grotesk\';color:'+(pending?'var(--mut2)':(current?'var(--accent)':'var(--txt)'))+';line-height:1.3">'+esc(l.title)+'</span><span style="font:500 11px \'JetBrains Mono\';color:var(--mut2)">'+(pending?'pronto':l.dur)+'</span></button>';}).join('')+'</div>';}).join('');
+  return '<main class="scn" style="padding:18px 22px 34px">'
+  +'<button onclick="app.go(\'course\')" style="display:inline-flex;align-items:center;gap:7px;background:none;border:none;color:var(--mut);cursor:pointer;font:500 13px \'Hanken Grotesk\';padding:0 0 14px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg> Volver al temario</button>'
+  +'<div style="position:relative;aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:linear-gradient(150deg,#1A2230,#0C0F17);display:flex;align-items:center;justify-content:center"><div style="position:absolute;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(240,80,46,.22),transparent 60%);animation:floatY 7s ease-in-out infinite"></div><svg viewBox="0 0 800 120" preserveAspectRatio="none" style="position:absolute;left:0;right:0;bottom:18%;width:100%;height:80px;opacity:.18"><path d="M0 60 Q 40 10 80 60 T 160 60 T 240 60 T 320 60 T 400 60 T 480 60 T 560 60 T 640 60 T 720 60 T 800 60" fill="none" stroke="var(--accent)" stroke-width="2"/></svg><button style="position:relative;width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.12);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.18);cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 24 24" fill="var(--accent)"><path d="M8 5v14l11-7z"/></svg></button><div style="position:absolute;left:0;right:0;bottom:0;height:5px;background:rgba(255,255,255,.12)"><div style="height:100%;width:34%;background:var(--accent)"></div></div><span style="position:absolute;left:16px;bottom:14px;font:500 12px \'JetBrains Mono\';color:rgba(255,255,255,.7)">02:38 / '+a.dur+'</span></div>'
+  +'<div style="margin-top:22px"><div style="font:500 11.5px \'JetBrains Mono\';letter-spacing:.2em;color:var(--accent)">'+esc(sec.tag)+' · Clase '+a.n+'</div><h1 style="margin:9px 0 9px;font:700 24px/1.14 \'Plus Jakarta Sans\';letter-spacing:-.01em">'+esc(a.title)+'</h1><p style="margin:0;font:400 15px/1.6 \'Hanken Grotesk\';color:var(--mut)">'+esc(SUMMARIES[a.id]||'')+'</p></div>'
+  +'<button onclick="app.toggleComplete()" style="margin-top:18px;display:inline-flex;align-items:center;gap:9px;background:'+(isDone?'rgba(86,197,150,.14)':'var(--accent)')+';color:'+(isDone?'#3FA877':'#fff')+';border:1px solid '+(isDone?'rgba(86,197,150,.4)':'transparent')+';cursor:pointer;padding:13px 20px;border-radius:11px;font:700 14px \'Hanken Grotesk\'"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> '+(isDone?'Completada':'Marcar completada')+'</button>'
+  +'<div style="display:flex;gap:6px;margin:26px 0 22px;border-bottom:1px solid var(--line)">'+tabs+'</div>'
+  +'<div>'+body+'</div>'
+  +'<div style="margin-top:34px;border-top:1px solid var(--line);background:var(--panel);margin-left:-22px;margin-right:-22px;padding:20px 16px"><div style="display:flex;align-items:center;justify-content:space-between;padding:0 6px 14px"><span style="font:700 14px \'Hanken Grotesk\'">Contenido del curso</span><span style="font:500 12px \'Hanken Grotesk\';color:var(--accent)">'+p.pct+'%</span></div>'+outline+'</div></main>';
+}
+
+function viewDashboard(){
+  var p=progress();
+  var sum=0;ZONES.forEach(function(z){sum+=state.levels[z.id];});var avg=(sum/ZONES.length).toFixed(1);
+  var stats=[
+    {label:'Progreso del curso',value:p.pct+'%',sub:p.done+' de '+p.total+' clases',color:'var(--accent)'},
+    {label:'Tensión promedio',value:avg,sub:'sobre 3 · '+WEEKS[state.weekSel].label,color:'var(--txt)'},
+    {label:'Sesiones registradas',value:String(state.sessions.length),sub:'en tu diario',color:'var(--txt)'},
+    {label:'Racha',value:'5',sub:'días seguidos',color:'var(--txt)'},
+  ].map(function(s){return '<div style="padding:20px;background:var(--card);border:1px solid var(--line);border-radius:16px"><div style="font:500 12.5px \'Hanken Grotesk\';color:var(--mut)">'+s.label+'</div><div style="font:800 30px/1 \'Plus Jakarta Sans\';margin-top:8px;color:'+s.color+'">'+s.value+'</div><div style="font:500 12px \'Hanken Grotesk\';color:var(--mut2);margin-top:6px">'+s.sub+'</div></div>';}).join('');
+  var weekTabs=WEEKS.map(function(w){var on=state.weekSel===w.id;return '<button onclick="app.setWeek('+w.id+')" style="background:'+(on?'var(--accent)':'transparent')+';color:'+(on?'#fff':'var(--mut)')+';border:none;cursor:pointer;padding:7px 12px;border-radius:7px;font:600 12px \'Hanken Grotesk\'">'+w.label+'</button>';}).join('');
+  var dots=ZONES.map(function(z){var lv=state.levels[z.id];var c=HEAT[lv];var size=(12+lv*4);return '<button onclick="app.cycleZone(\''+z.id+'\')" title="'+z.label+'" style="position:absolute;top:'+z.top+';left:'+z.left+';transform:translate(-50%,-50%);width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+c+';border:2px solid rgba(255,255,255,.9);cursor:pointer;box-shadow:0 0 0 '+(lv*2)+'px '+hexA(c,.4)+';transition:all .2s"></button>';}).join('');
+  var legendRows=ZONES.map(function(z){var lv=state.levels[z.id];var c=HEAT[lv];return '<button onclick="app.cycleZone(\''+z.id+'\')" style="display:flex;align-items:center;gap:12px;width:100%;padding:9px 12px;background:var(--panel);border:1px solid var(--line);border-radius:10px;cursor:pointer;text-align:left"><span style="width:11px;height:11px;border-radius:50%;flex-shrink:0;background:'+c+'"></span><span style="flex:1;font:600 13.5px \'Hanken Grotesk\'">'+z.label+'</span><span style="font:600 11px \'Hanken Grotesk\';color:'+c+';padding:3px 9px;border-radius:20px;background:'+hexA(c,.14)+'">'+LEVELS[lv]+'</span></button>';}).join('');
+  var scale=LEVELS.map(function(l,i){return '<span style="display:inline-flex;align-items:center;gap:6px;font:500 11px \'Hanken Grotesk\';color:var(--mut2)"><span style="width:9px;height:9px;border-radius:50%;background:'+HEAT[i]+'"></span>'+l+'</span>';}).join('');
+  var evo=ZONES.map(function(z){var cells=z.evo.map(function(v){return '<div style="flex:1;height:9px;border-radius:6px;background:rgba(0,0,0,.06);overflow:hidden"><div style="height:100%;width:'+((v/3)*100)+'%;background:'+HEAT[v]+';border-radius:6px"></div></div>';}).join('');return '<div style="display:grid;grid-template-columns:74px 1fr;gap:12px;align-items:center"><span style="font:600 12.5px \'Hanken Grotesk\'">'+z.label+'</span><div style="display:flex;align-items:center;gap:6px">'+cells+'</div></div>';}).join('');
+  var entries=state.sessions.map(function(s){var items=[[DQ[0],s.a1],[DQ[1],s.a2],[DQ[2],s.a3]].map(function(qi){return '<div><div style="font:500 11.5px/1.3 \'Hanken Grotesk\';color:var(--mut2);margin-bottom:5px">'+qi[0]+'</div><div style="font:400 14px/1.45 \'Hanken Grotesk\';color:#2A2D35">'+esc(qi[1])+'</div></div>';}).join('');return '<div style="border:1px solid var(--line);border-radius:14px;padding:16px 18px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font:600 13px \'Hanken Grotesk\'">'+s.title+'</span><span style="font:500 11.5px \'JetBrains Mono\';color:var(--mut2)">'+s.date+'</span></div><div style="display:flex;flex-direction:column;gap:12px">'+items+'</div></div>';}).join('');
+  return '<main class="scn" style="padding:26px 22px 34px">'
+  +'<h1 style="margin:0 0 6px;font:700 28px/1.12 \'Plus Jakarta Sans\';letter-spacing:-.01em">Tu progreso</h1>'
+  +'<p style="margin:0 0 26px;font:400 15px \'Hanken Grotesk\';color:var(--mut)">Tu evolución y tus sensaciones — no las clases. Para las clases, ve a <strong style="color:var(--txt);font-weight:600">Mi curso</strong>.</p>'
+  +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px">'+stats+'</div>'
+  +'<section style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;margin-bottom:18px"><div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;margin-bottom:6px"><div><h2 style="margin:0;font:600 18px \'Hanken Grotesk\'">Mapa de Tensión</h2><p style="margin:4px 0 0;font:400 13px \'Hanken Grotesk\';color:var(--mut)">Toca una zona para registrar su nivel.</p></div><div style="display:flex;gap:4px;padding:4px;background:var(--panel);border:1px solid var(--line);border-radius:10px">'+weekTabs+'</div></div>'
+  +'<div style="display:flex;justify-content:center;margin:18px 0"><div style="position:relative;width:200px;height:320px"><svg width="200" height="320" viewBox="0 0 200 320" fill="none"><path d="M100 18 C84 18 73 31 73 49 C73 60 77 69 84 75 C80 78 70 82 70 92 L66 99 C58 103 50 110 46 124 L36 168 C34 178 44 183 49 174 L60 138 L62 150 C58 176 56 210 58 250 C59 272 62 296 66 312 C68 318 86 318 87 311 L94 250 L100 250 L106 250 L113 311 C114 318 132 318 134 312 C138 296 141 272 142 250 C144 210 142 176 138 150 L140 138 L151 174 C156 183 166 178 164 168 L154 124 C150 110 142 103 134 99 L130 92 C130 82 120 78 116 75 C123 69 127 60 127 49 C127 31 116 18 100 18 Z" fill="rgba(0,0,0,.04)" stroke="rgba(0,0,0,.14)" stroke-width="1.4"/></svg>'+dots+'</div></div>'
+  +'<div style="display:flex;flex-direction:column;gap:7px">'+legendRows+'<div style="display:flex;gap:14px;margin-top:8px;padding:0 4px;flex-wrap:wrap">'+scale+'</div></div></section>'
+  +'<section style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;margin-bottom:18px"><h2 style="margin:0;font:600 18px \'Hanken Grotesk\'">Mi evolución</h2><p style="margin:4px 0 20px;font:400 13px \'Hanken Grotesk\';color:var(--mut)">Tensión por zona · semanas 1 · 4 · 8</p><div style="display:flex;flex-direction:column;gap:13px">'+evo+'</div><div style="display:flex;justify-content:space-between;margin-top:12px;padding-left:86px;font:500 11px \'JetBrains Mono\';color:var(--mut2)"><span>S1</span><span>S4</span><span>S8</span></div><blockquote style="margin:22px 0 0;padding:14px 16px;background:var(--panel);border-radius:12px;font:400 16px/1.4 \'Newsreader\',serif;font-style:italic;color:var(--mut)">«Mientras más clara es la sensación, más claro es el control sobre la voz.»</blockquote></section>'
+  +'<section style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px"><div><h2 style="margin:0;font:600 18px \'Hanken Grotesk\'">Diario de práctica</h2><p style="margin:4px 0 0;font:400 13px \'Hanken Grotesk\';color:var(--mut)">Registra tus observaciones después de cada sesión.</p></div><span style="font:500 13px \'Hanken Grotesk\';color:var(--accent)">'+state.sessions.length+'</span></div>'
+  +'<div style="background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px"><div style="font:600 13px \'Hanken Grotesk\';margin-bottom:12px;color:var(--mut)">Nueva sesión</div><div style="display:flex;flex-direction:column;gap:10px"><input value="'+esc(state.draft.q1)+'" oninput="app.draft(\'q1\',this.value)" placeholder="'+DQ[0]+'" style="background:var(--card);border:1px solid var(--line2);border-radius:10px;padding:12px 14px;font:400 14px \'Hanken Grotesk\';color:var(--txt);outline:none"/><input value="'+esc(state.draft.q2)+'" oninput="app.draft(\'q2\',this.value)" placeholder="'+DQ[1]+'" style="background:var(--card);border:1px solid var(--line2);border-radius:10px;padding:12px 14px;font:400 14px \'Hanken Grotesk\';color:var(--txt);outline:none"/><input value="'+esc(state.draft.q3)+'" oninput="app.draft(\'q3\',this.value)" placeholder="'+DQ[2]+'" style="background:var(--card);border:1px solid var(--line2);border-radius:10px;padding:12px 14px;font:400 14px \'Hanken Grotesk\';color:var(--txt);outline:none"/></div><button onclick="app.addSession()" style="margin-top:14px;display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;padding:11px 20px;border-radius:10px;font:700 13.5px \'Hanken Grotesk\'"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> Guardar sesión</button></div>'
+  +'<div style="display:flex;flex-direction:column;gap:12px">'+entries+'</div></section></main>';
+}
+
+function viewResources(){
+  var pages=PDF_PAGES.map(function(pg){return '<span style="font:500 12px \'Hanken Grotesk\';color:var(--mut);padding:6px 12px;background:rgba(0,0,0,.035);border:1px solid var(--line);border-radius:20px">'+pg+'</span>';}).join('');
+  var other=OTHER_RES.map(function(r){return '<div style="background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;flex-direction:column"><div style="width:44px;height:44px;border-radius:11px;background:var(--card2);display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:20px">'+r.icon+'</div><div style="font:600 16px \'Hanken Grotesk\';margin-bottom:6px">'+r.title+'</div><div style="flex:1;font:400 13.5px/1.5 \'Hanken Grotesk\';color:var(--mut);margin-bottom:16px">'+r.desc+'</div><button style="align-self:flex-start;background:rgba(0,0,0,.04);color:var(--txt);border:1px solid var(--line2);cursor:pointer;padding:9px 16px;border-radius:9px;font:600 13px \'Hanken Grotesk\'">'+r.action+'</button></div>';}).join('');
+  return '<main class="scn" style="padding:26px 22px 34px">'
+  +'<h1 style="margin:0 0 6px;font:700 28px/1.12 \'Plus Jakarta Sans\';letter-spacing:-.01em">Recursos descargables</h1>'
+  +'<p style="margin:0 0 26px;font:400 15px \'Hanken Grotesk\';color:var(--mut)">Materiales para acompañar tu práctica fuera de cámara.</p>'
+  +'<div style="background:linear-gradient(150deg,var(--card),var(--panel));border:1px solid var(--line);border-radius:20px;overflow:hidden;margin-bottom:24px">'
+  +'<div style="position:relative;height:170px;background:linear-gradient(160deg,#1C2433,#0C0F17);display:flex;align-items:center;justify-content:center"><div style="width:130px;height:170px;background:#F4F1EA;border-radius:6px;box-shadow:0 20px 50px -10px rgba(0,0,0,.6);transform:rotate(-4deg);padding:14px"><div style="font:700 6.5px \'Hanken Grotesk\';letter-spacing:.1em;color:#0A0D15">THE RESONANCE METHOD</div><div style="font:800 10px \'Plus Jakarta Sans\';color:#0A0D15;margin-top:9px;line-height:1.1">Mapa de Tensión</div><div style="margin-top:12px;display:flex;flex-direction:column;gap:6px"><div style="height:5px;width:80%;background:rgba(10,13,21,.12);border-radius:3px"></div><div style="height:5px;width:60%;background:rgba(10,13,21,.12);border-radius:3px"></div><div style="height:5px;width:72%;background:rgba(240,80,46,.5);border-radius:3px"></div><div style="height:5px;width:50%;background:rgba(10,13,21,.12);border-radius:3px"></div></div></div></div>'
+  +'<div style="padding:28px 24px"><div style="font:500 11.5px \'JetBrains Mono\';letter-spacing:.2em;color:var(--accent)">HERRAMIENTA PRINCIPAL</div><h2 style="margin:12px 0 10px;font:700 22px/1.12 \'Plus Jakarta Sans\'">Autodiagnóstico — Mapa de Tensión</h2><p style="margin:0 0 18px;font:400 15px/1.6 \'Hanken Grotesk\';color:var(--mut)">Completa el escaneo justo después del Video 3 — Diagnóstico. Guárdalo durante todo el curso: al final vas a ver cuánto cambió tu instrumento.</p><div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px">'+pages+'</div><button style="display:inline-flex;align-items:center;gap:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;cursor:pointer;padding:14px 22px;border-radius:12px;font:700 14.5px \'Hanken Grotesk\'"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg> Descargar PDF</button></div></div>'
+  +'<div style="display:flex;flex-direction:column;gap:14px">'+other+'</div></main>';
+}
+
+/* ============ RENDER ============ */
+function renderBottomNav(){
+  var nav=document.getElementById('bottomnav');
+  if(state.screen==='welcome'){nav.style.display='none';return;}
+  nav.style.display='flex';
+  nav.innerHTML=BOTTOM.map(function(b){
+    var active=(b.id===state.screen)||(b.id==='course'&&state.screen==='player');
+    var color=active?'var(--accent)':'#969CAC';
+    return '<button onclick="app.go(\''+b.id+'\')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;color:'+color+';padding:4px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="'+b.d+'"/></svg><span style="font:600 10px \'Hanken Grotesk\'">'+b.label+'</span></button>';
+  }).join('');
+}
+function render(){
+  var s=document.getElementById('screen');
+  var v=state.screen;
+  if(v==='welcome')s.innerHTML=viewWelcome();
+  else if(v==='home')s.innerHTML=viewHome();
+  else if(v==='course')s.innerHTML=viewCourse();
+  else if(v==='player')s.innerHTML=viewPlayer();
+  else if(v==='dashboard')s.innerHTML=viewDashboard();
+  else if(v==='resources')s.innerHTML=viewResources();
+  renderBottomNav();
+}
+render();
+</script>
+</body>
+</html>
